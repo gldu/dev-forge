@@ -68,7 +68,7 @@ User intent
 ```
 dev-forge/
 └── skills/
-    ├── forge-router/              # R0 routing entry Orchestrator — parse intent, route stages, estimate budget
+    ├── forge-router/          # R0 routing entry Orchestrator — parse intent, route stages, estimate budget
     ├── forge-change/          # change proposal generator — clarify ideas, produce CHANGE.md
     ├── forge-requirement/     # requirements analyst — user stories, AC, scope splitting
     ├── forge-design/          # technical designer — tech selection, architecture diagram, ADR, risk analysis

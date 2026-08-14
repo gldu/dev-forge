@@ -68,7 +68,7 @@ dev-forge 融合 **Harness Engineering、GStack、OMO、OpenSpec、Spec-Kit、Su
 ```
 dev-forge/
 └── skills/
-    ├── forge-router/              # R0 路由入口 Orchestrator — 解析意图、路由阶段、估算预算
+    ├── forge-router/          # R0 路由入口 Orchestrator — 解析意图、路由阶段、估算预算
     ├── forge-change/          # 变更提案生成器 — 澄清想法、生成 CHANGE.md
     ├── forge-requirement/     # 需求分析师 — 用户故事、AC、范围切分
     ├── forge-design/          # 技术设计师 — 技术选型、架构图、ADR、风险分析
