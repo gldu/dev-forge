@@ -10,18 +10,7 @@
   "license": "MIT",
   "keywords": ["sdlc", "workflow", "skills", "tdd", "planning"],
   "skills": "./skills/",
-  "hooks": {
-    "SessionStart": {
-      "hooks": [
-        {
-          "type": "command",
-          "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start --claude",
-          "shell": "bash",
-          "async": false
-        }
-      ]
-    }
-  },
+  "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "dev-forge",
     "shortDescription": "SDLC workflow framework for coding agents",
