@@ -3,6 +3,12 @@
 
 set -euo pipefail
 
+# Parse explicit platform argument (--cursor / --claude / empty).
+# Prefer the explicit flag because CURSOR_PLUGIN_ROOT / CLAUDE_PLUGIN_ROOT
+# are only injected in plugin mode; env vars remain a fallback for direct
+# invocations that were wired before explicit flags existed.
+PLATFORM="${1:-}"
+
 # Determine plugin root directory
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
@@ -30,11 +36,17 @@ session_context="<EXTREMELY_IMPORTANT>\nYou have dev-forge.\n\n**Below is the fu
 # Copilot CLI (v1.0.11+) and others expect additionalContext (top-level, SDK standard).
 # Claude Code reads BOTH additional_context and hookSpecificOutput without
 # deduplication, so we must emit only the field the current platform consumes.
-if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+# Platform detection: explicit --cursor/--claude argument wins, env-var
+# detection (CURSOR_PLUGIN_ROOT / CLAUDE_PLUGIN_ROOT) is the fallback for
+# invocations without an explicit flag.
+if [ "$PLATFORM" = "--cursor" ] || [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  # Cursor: additional_context (snake_case)
   printf '{\n  "additional_context": "%s"\n}\n' "$session_context" | cat
-elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+elif [ "$PLATFORM" = "--claude" ] || { [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; }; then
+  # Claude: hookSpecificOutput 嵌套
   printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context" | cat
 else
+  # SDK 标准: 顶层 additionalContext
   printf '{\n  "additionalContext": "%s"\n}\n' "$session_context" | cat
 fi
 
