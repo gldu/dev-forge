@@ -1,0 +1,15 @@
+{
+  "name": "dev-forge",
+  "displayName": "dev-forge",
+  "description": "Agentic SDLC workflow framework: requirements, design, TDD development, testing, review, integration, release",
+  "version": "0.1.0",
+  "author": {
+    "name": "dev-forge contributors"
+  },
+  "homepage": "https://github.com/<org>/dev-forge",
+  "repository": "https://github.com/<org>/dev-forge",
+  "license": "MIT",
+  "keywords": ["skills", "sdlc", "workflow", "tdd", "planning", "code-review"],
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks-cursor.json"
+}

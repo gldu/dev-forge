@@ -1,0 +1,14 @@
+{
+  "name": "dev-forge",
+  "owner": { "name": "dev-forge contributors" },
+  "plugins": [
+    {
+      "name": "dev-forge",
+      "description": "Agentic SDLC workflow framework",
+      "version": "0.1.0",
+      "source": "https://github.com/<org>/dev-forge",
+      "author": { "name": "dev-forge contributors" },
+      "license": "MIT"
+    }
+  ]
+}

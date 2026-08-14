@@ -1,0 +1,38 @@
+{
+  "name": "dev-forge",
+  "version": "0.1.0",
+  "description": "Agentic SDLC workflow framework: requirements, design, TDD, testing, review, integration, release",
+  "author": {
+    "name": "dev-forge contributors"
+  },
+  "homepage": "https://github.com/<org>/dev-forge",
+  "repository": "https://github.com/<org>/dev-forge",
+  "license": "MIT",
+  "keywords": ["sdlc", "workflow", "skills", "tdd", "planning"],
+  "skills": "./skills/",
+  "hooks": {
+    "SessionStart": {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start --claude",
+          "shell": "bash",
+          "async": false
+        }
+      ]
+    }
+  },
+  "interface": {
+    "displayName": "dev-forge",
+    "shortDescription": "SDLC workflow framework for coding agents",
+    "longDescription": "Turn the SDLC into structured, traceable, reproducible AI-driven processes: requirements, design, development, testing, review, integration, release.",
+    "developerName": "dev-forge contributors",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "I've got an idea for something I'd like to build.",
+      "Let's add a feature to this project."
+    ],
+    "websiteURL": "https://github.com/<org>/dev-forge"
+  }
+}
