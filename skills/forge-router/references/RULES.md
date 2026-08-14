@@ -7,11 +7,11 @@
 
 ## R0 · 入口与路由
 
-- **R0.1 · 双入口模型（直连 vs 路由）** dev-forge 有两个合法入口，AI 不得强制把直连请求拉回 forge-go：
-  1. **直连触发**：用户直接点名某个子 skill（如"修这个报错"→ `forge-fix`、"审查代码"→ `forge-review`）或被平台 description 匹配触发。此时**跳过 R0 路由**，该 skill 自行执行自己的 Preflight，无需经过 forge-go。
-  2. **路由触发**：通过 `forge-go` 进入。适用于三类场景——① 意图含混 / 新事物 / 恢复；② 跨阶段切换（0→8）；③ 需要 Token 预算估算。
-  - 直连触发的 skill 发现上游工件缺失时，按自己的 Preflight 回退，不得把用户踢回 forge-go 重走一遍（R2.x 阶段门仍然适用）。
-- **R0.2 · 路由不得重复门禁** 已经直连进入的阶段，其上游工件检查由该阶段自身 Preflight 完成；forge-go 只在被路由调用时执行全局 Preflight。
+- **R0.1 · 双入口模型（直连 vs 路由）** dev-forge 有两个合法入口，AI 不得强制把直连请求拉回 forge-router：
+  1. **直连触发**：用户直接点名某个子 skill（如"修这个报错"→ `forge-fix`、"审查代码"→ `forge-review`）或被平台 description 匹配触发。此时**跳过 R0 路由**，该 skill 自行执行自己的 Preflight，无需经过 forge-router。
+  2. **路由触发**：通过 `forge-router` 进入。适用于三类场景——① 意图含混 / 新事物 / 恢复；② 跨阶段切换（0→8）；③ 需要 Token 预算估算。
+  - 直连触发的 skill 发现上游工件缺失时，按自己的 Preflight 回退，不得把用户踢回 forge-router 重走一遍（R2.x 阶段门仍然适用）。
+- **R0.2 · 路由不得重复门禁** 已经直连进入的阶段，其上游工件检查由该阶段自身 Preflight 完成；forge-router 只在被路由调用时执行全局 Preflight。
 
 ## R1 · 上下文与 Token
 

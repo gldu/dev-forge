@@ -23,9 +23,9 @@ dev-forge 融合 **Harness Engineering、GStack、OMO、OpenSpec、Spec-Kit、Su
 用户意图
     │
     ├── 直连触发（R0.1）→ 平台 description 匹配直接进入对应子 skill（如 "修这个报错" → forge-fix）
-    │        （跳过 forge-go 路由，各 skill 自带 Preflight）
+    │        （跳过 forge-router 路由，各 skill 自带 Preflight）
     │
-    └── 路由触发 → forge-go（R0 路由入口）
+    └── 路由触发 → forge-router（R0 路由入口）
               │
               ├── 新事物 → 0-change（变更提案）
               │                ↓
@@ -68,7 +68,7 @@ dev-forge 融合 **Harness Engineering、GStack、OMO、OpenSpec、Spec-Kit、Su
 ```
 dev-forge/
 └── skills/
-    ├── forge-go/              # R0 路由入口 Orchestrator — 解析意图、路由阶段、估算预算
+    ├── forge-router/              # R0 路由入口 Orchestrator — 解析意图、路由阶段、估算预算
     ├── forge-change/          # 变更提案生成器 — 澄清想法、生成 CHANGE.md
     ├── forge-requirement/     # 需求分析师 — 用户故事、AC、范围切分
     ├── forge-design/          # 技术设计师 — 技术选型、架构图、ADR、风险分析
@@ -100,7 +100,7 @@ dev-forge/
 
 | Skill | 阶段 | 角色 | 核心产出 |
 |---|---|---|---|
-| `forge-go` | 全局 | Orchestrator | 路由声明、阶段切换、预算估算 |
+| `forge-router` | 全局 | Orchestrator | 路由声明、阶段切换、预算估算 |
 | `forge-change` | 0 | Partner | `.specs/<id>/CHANGE.md` |
 | `forge-requirement` | 1 | Partner | `.specs/<id>/REQUIREMENT.md` |
 | `forge-design` | 2 | Architect | `.specs/<id>/DESIGN.md`、ADR |
@@ -233,4 +233,4 @@ mkdir -p ~/.pi/agent/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.pi/ag
 - `forge-review`：禁止直接修改代码；所有 Critical 必须修复或经人工确认
 - `forge-test`：测试用例从 AC 派生，不从实现派生；禁止通过删除/弱化测试来"修复"失败
 - `forge-integration`：归档操作必须用户确认；UAT 失败自动重试不超过 3 轮
-- `forge-go`：Preflight 失败必须回退；禁止要求用户提供 ID/路径/阶段名
+- `forge-router`：Preflight 失败必须回退；禁止要求用户提供 ID/路径/阶段名

@@ -57,7 +57,7 @@ description: Use when safely rolling back failed deployments, reverting database
 
 ## 回滚后 STATE.md 更新
 
-回滚完成后读取仓库根 `STATE.md`（字段契约见 forge-go 的 STATE.md 模板），按现状更新**仅字段契约内存在**的字段，禁止自造字段：
+回滚完成后读取仓库根 `STATE.md`（字段契约见 forge-router 的 STATE.md 模板），按现状更新**仅字段契约内存在**的字段，禁止自造字段：
 
 - 回滚发生在**活跃 change 中断**时（如线上故障打断 dev）→ 更新 `interrupted_at` 记录中断位置与原因，例如：
   ```yaml

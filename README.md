@@ -23,9 +23,9 @@ dev-forge fuses engineering methodologies and agent-framework ideas from **Harne
 User intent
     │
     ├── Direct trigger (R0.1) → platform description matching enters the matching sub-skill directly (e.g. "fix this error" → forge-fix)
-    │        (skips forge-go routing; each skill carries its own Preflight)
+    │        (skips forge-router routing; each skill carries its own Preflight)
     │
-    └── Routed trigger → forge-go (R0 routing entry)
+    └── Routed trigger → forge-router (R0 routing entry)
               │
               ├── New thing → 0-change (change proposal)
               │                     ↓
@@ -68,7 +68,7 @@ User intent
 ```
 dev-forge/
 └── skills/
-    ├── forge-go/              # R0 routing entry Orchestrator — parse intent, route stages, estimate budget
+    ├── forge-router/              # R0 routing entry Orchestrator — parse intent, route stages, estimate budget
     ├── forge-change/          # change proposal generator — clarify ideas, produce CHANGE.md
     ├── forge-requirement/     # requirements analyst — user stories, AC, scope splitting
     ├── forge-design/          # technical designer — tech selection, architecture diagram, ADR, risk analysis
@@ -100,7 +100,7 @@ Each Skill directory contains:
 
 | Skill | Stage | Role | Core Output |
 |---|---|---|---|
-| `forge-go` | Global | Orchestrator | routing declaration, stage switching, budget estimation |
+| `forge-router` | Global | Orchestrator | routing declaration, stage switching, budget estimation |
 | `forge-change` | 0 | Partner | `.specs/<id>/CHANGE.md` |
 | `forge-requirement` | 1 | Partner | `.specs/<id>/REQUIREMENT.md` |
 | `forge-design` | 2 | Architect | `.specs/<id>/DESIGN.md`, ADR |
@@ -233,4 +233,4 @@ Once installed, you can trigger the corresponding workflow directly via natural 
 - `forge-review`: never modify code directly; every Critical must be fixed or human-confirmed
 - `forge-test`: test cases derive from AC, not from implementation; never "fix" failures by deleting or weakening tests
 - `forge-integration`: archival requires user confirmation; UAT failure auto-retry is capped at 3 rounds
-- `forge-go`: Preflight failure must fall back; never ask the user to provide IDs/paths/stage names
+- `forge-router`: Preflight failure must fall back; never ask the user to provide IDs/paths/stage names

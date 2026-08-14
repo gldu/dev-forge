@@ -19,7 +19,7 @@ description: Use when batch-syncing architecture decisions and change-level lear
 - **每月 / 每季度**：积累若干 change 后批量同步一次
 - **里程碑后**：版本发布或大功能完成后，把沉淀凝固到项目层
 - **CONTEXT 失准信号**：forge-dev 阶段连续多次发现 AI 没沿用既有抽象（说明索引漏了）
-- **`STATE.md` `last_evolve_at` 距今 > 60 天**：forge-go 路由时会主动提示
+- **`STATE.md` `last_evolve_at` 距今 > 60 天**：forge-router 路由时会主动提示
 - **forge-health 冗余巡检留的尾巴**：CONTEXT.md「清理窗口专列 / 技术债」有标记 → 扫描时主动把对应「既有抽象索引」条目拎出来让用户确认是否删
 
 ## 输入

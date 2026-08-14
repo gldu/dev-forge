@@ -1,9 +1,9 @@
 ---
-name: forge-go
+name: forge-router
 description: Use when standard entrance or orchestrator for dev-forge is needed, such as starting a new feature, resuming past work, running code reviews, running tests, or managing change lifecycles.
 ---
 
-# forge-go — dev-forge 路由入口（R0）
+# forge-router — dev-forge 路由入口（R0）
 
 ## Goal
 
@@ -15,7 +15,7 @@ description: Use when standard entrance or orchestrator for dev-forge is needed,
 5. 自动准备（生成 change-id、加载规则与工件）
 6. 显式声明执行计划后进入对应子 skill
 
-> **直连触发（R0.1）**：20 个子 skill 自带 description，可被平台直接触发（如"修这个报错"→ forge-fix、"审查代码"→ forge-review）。直连时**跳过 R0 路由**，各 skill 自行执行 Preflight。forge-go 负责三类场景：① 意图含混 / 新事物 / 恢复；② 跨阶段切换（0→8）；③ 需要预算估算或 Preflight 门禁兜底。两条路径的准入差异见 RULES R0.1。
+> **直连触发（R0.1）**：20 个子 skill 自带 description，可被平台直接触发（如"修这个报错"→ forge-fix、"审查代码"→ forge-review）。直连时**跳过 R0 路由**，各 skill 自行执行 Preflight。forge-router 负责三类场景：① 意图含混 / 新事物 / 恢复；② 跨阶段切换（0→8）；③ 需要预算估算或 Preflight 门禁兜底。两条路径的准入差异见 RULES R0.1。
 
 ## Workflow
 
@@ -218,7 +218,7 @@ Change-ID：<id>（已自动生成 / 已恢复活跃 change：<existing-id>）
 - ADR 产物写入 `.specs/adr/<NNN>-<title>.md`
 - 项目级产物（CONTEXT / ARCHITECTURE / LESSONS / health / evolve）写入 `.specs/`
 - 归档产物写入 `.specs/archive/<YYYY-MM-DD>-<change-id>/`
-- 状态文件 `STATE.md` 在仓库根，由 forge-go 和各子 skill 共同维护
+- 状态文件 `STATE.md` 在仓库根，由 forge-router 和各子 skill 共同维护
 - `PROGRESS.md` / `LESSONS.md` 作为跨 change 共享状态，位于 `.specs/`
 
 ## Decision Tree

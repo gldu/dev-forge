@@ -34,8 +34,8 @@
 
 ## R0 · 入口与路由
 
-- **R0.1 · 双入口模型** 两个合法入口，不得强制把直连请求拉回 forge-go：① **直连触发**——用户直接点名子 skill 或被平台 description 匹配（如"修这个报错"→ forge-fix），跳过 R0 路由，该 skill 自行 Preflight；② **路由触发**——经 forge-go，适用意图含混 / 新事物 / 恢复 / 跨阶段切换 / 需预算估算。
-- **R0.2 · 路由不得重复门禁** 直连进入的阶段由自身 Preflight 检查上游；forge-go 只在被路由调用时做全局 Preflight。
+- **R0.1 · 双入口模型** 两个合法入口，不得强制把直连请求拉回 forge-router：① **直连触发**——用户直接点名子 skill 或被平台 description 匹配（如"修这个报错"→ forge-fix），跳过 R0 路由，该 skill 自行 Preflight；② **路由触发**——经 forge-router，适用意图含混 / 新事物 / 恢复 / 跨阶段切换 / 需预算估算。
+- **R0.2 · 路由不得重复门禁** 直连进入的阶段由自身 Preflight 检查上游；forge-router 只在被路由调用时做全局 Preflight。
 
 ## R1 · 上下文与 Token
 
