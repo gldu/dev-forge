@@ -1,6 +1,7 @@
 # UI 反模式清单
 
 > 来源：Anthropic `frontend-design` skill + impeccable 项目 anti-pattern 库。
+> **镜像文件**：与 `forge-ui-design/references/ui-anti-patterns.md`（权威版）完全一致。改动必须全量同步（见 RULES R1.10）。
 
 ---
 

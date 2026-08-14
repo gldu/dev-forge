@@ -5,6 +5,14 @@
 
 ---
 
+## R0 · 入口与路由
+
+- **R0.1 · 双入口模型（直连 vs 路由）** dev-forge 有两个合法入口，AI 不得强制把直连请求拉回 forge-go：
+  1. **直连触发**：用户直接点名某个子 skill（如"修这个报错"→ `forge-fix`、"审查代码"→ `forge-review`）或被平台 description 匹配触发。此时**跳过 R0 路由**，该 skill 自行执行自己的 Preflight，无需经过 forge-go。
+  2. **路由触发**：通过 `forge-go` 进入。适用于三类场景——① 意图含混 / 新事物 / 恢复；② 跨阶段切换（0→8）；③ 需要 Token 预算估算。
+  - 直连触发的 skill 发现上游工件缺失时，按自己的 Preflight 回退，不得把用户踢回 forge-go 重走一遍（R2.x 阶段门仍然适用）。
+- **R0.2 · 路由不得重复门禁** 已经直连进入的阶段，其上游工件检查由该阶段自身 Preflight 完成；forge-go 只在被路由调用时执行全局 Preflight。
+
 ## R1 · 上下文与 Token
 
 - **R1.1** 出现以下**任一信号**时必须触发清窗（非数值死规，而是信号触发）：
@@ -54,6 +62,15 @@
   2. **未越界**：`tech-stacks-excerpt.md` / `ui-aesthetics.md` / `test-pyramid-excerpt.md` 严禁默认整读，先 grep 标题再 read offset
   3. **声明义务**：路由声明 / 任务计划里必须列出每个加载项的**起止行**或标注「全读 N 行」
   4. **后置加载**：里面某节首轮没用到 → 标在「未加载」段并说明何时拉
+
+- **R1.10 · 镜像文件同步（单一来源）** 以下文件存在多份副本，**唯一权威版**与其镜像关系固定：
+  | 权威版（canonical） | 镜像（必须同步） |
+  |---|---|
+  | `forge-ui-design/references/ui-anti-patterns.md` | `forge-dev/`、`forge-review/`、`forge-restyle/` 同名文件 |
+  | `forge-ui-design/references/ui-aesthetics.md` | `forge-restyle/references/ui-aesthetics.md`（超集扩展，参数以权威版为准） |
+  1. **改权威版必须全量同步所有镜像**（内容、措辞、行数），restyle 精简版同步语义。
+  2. **改镜像必须先改权威版**，禁止只改副本造成漂移。
+  3. 每个 skill 的 Validation 清单含「已核对镜像一致性」项；发现漂移按 R1.10 修复后继续。
 
 ## R2 · 阶段门（Stage Gates）
 

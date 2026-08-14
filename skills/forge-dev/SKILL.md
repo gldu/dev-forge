@@ -178,6 +178,7 @@ RED → GREEN → REFACTOR：
 - [ ] TASK.md 对应任务已勾选
 - [ ] 没有改动 REQUIREMENT.md / DESIGN.md
 - [ ] 没有越界改其他任务的文件
+- [ ] **镜像一致性（R1.10）**：若改动过 `ui-anti-patterns.md`，已全量同步权威版 forge-ui-design 及其余镜像
 
 ## Resources
 

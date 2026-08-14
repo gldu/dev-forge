@@ -7,7 +7,7 @@
 | 字段 | 必填 | 说明 |
 |---|---|---|
 | `active_change` | ✅ | 当前活跃 change-id（如 `20260814-login`）；无活跃 change 则为 `-` |
-| `current_stage` | ✅ | 当前阶段（0 / 1 / 2 / 2a / 3 / 4 / 5 / 6 / 7）；无活跃 change 则为 `-` |
+| `current_stage` | ✅ | 当前阶段（0 / 1 / 2 / 2a / 3 / 4 / 5 / 6 / 7 / 8）；无活跃 change 则为 `-` |
 | `current_task` | ✅ | 当前任务编号（如 `T03`）；非 dev 阶段则为 `-` |
 | `interrupted_at` | ✅ | 最近中断位置（阶段 + 任务 + 动作），恢复入口 |
 | `last_intel_scan` | ✅ | 最近一次 intel-scan 日期（YYYY-MM-DD） |

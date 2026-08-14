@@ -1,6 +1,7 @@
 # UI 反模式清单（精简版）
 
 > 来源：Anthropic `frontend-design` skill + impeccable 项目 anti-pattern 库。
+> **镜像文件（精简子集）**：本文件是 `forge-ui-design/references/ui-anti-patterns.md`（权威版）的精简改写——restyle 场景聚焦字体/颜色/阴影/布局高频禁忌，条目数少于权威版，条目措辞带 ❌ 标记。改动必须全量同步权威版语义（见 RULES R1.10）。
 
 ## 强制禁忌（命中即必须改）
 

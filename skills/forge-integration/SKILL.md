@@ -7,7 +7,7 @@ description: Use when validating finished changes, running UAT verification, dia
 
 ## Goal
 
-作为 Verifier + Release，完成集成验证、人工 UAT、失败诊断与修复、LESSONS 提名、归档。
+作为 Verifier，完成集成验证、人工 UAT、失败诊断与修复、LESSONS 提名、归档。归档通过后若需上线，交接给 `forge-release`（8-release）执行发布部署。
 
 ## Workflow
 
@@ -64,7 +64,14 @@ UAT-1：<场景>
 - 更新仓库根 `STATE.md`
 - **不要归档 `.specs/LESSONS.md`**——项目级常驻文件
 
-#### 5.1 项目级架构文档同步（不在本步做 · 走 E-evolve）
+#### 5.1 发布交接（不在本步做 · 走 8-release）
+
+归档完成 = 该 change **可发布**，不等于已发布。如需上线：
+- 提示用户："change 已归档，可发布。跑 `forge-release`（发布前检查 + 版本推导 + 灰度 + 回滚预案）"
+- 在 CHANGELOG 该行标注 `[pending-release]`，发布成功后由 forge-release 改为 `[released vX.Y.Z]`
+- **禁止**在本步直接打 tag / 部署——发布是不可逆动作，交给 8-release 阶段统一把关
+
+#### 5.2 项目级架构文档同步（不在本步做 · 走 E-evolve）
 
 本 change 的 `DESIGN.md §9` **不在归档时立即合并到 CONTEXT.md**。原因：单个 change 视角窄，容易把临时决策错升项目级。
 

@@ -104,9 +104,9 @@ description: Use when starting a new change proposal, initializing CHANGE.md, or
 
 ### 5. 路径建议
 
-- **完整**：REQUIREMENT → DESIGN → TASK → DEV → TEST → REVIEW → INTEGRATION
-- **中等**：(REQUIREMENT 增量) → TASK → DEV → TEST → REVIEW → INTEGRATION
-- **最短**：TASK → DEV → TEST → REVIEW → INTEGRATION（仅纯 bug 修复或微调）
+- **完整**：REQUIREMENT → DESIGN → TASK → DEV → TEST → REVIEW → INTEGRATION → ARCHIVE → 8-release
+- **中等**：(REQUIREMENT 增量) → TASK → DEV → TEST → REVIEW → INTEGRATION → ARCHIVE → 8-release
+- **最短**：TASK → DEV → TEST → REVIEW → INTEGRATION（仅纯 bug 修复或微调；发布仍走 8-release）
 
 ## Constraints
 

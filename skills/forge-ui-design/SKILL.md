@@ -120,6 +120,7 @@ v0 = 占位符 + 关键布局 + 已选 token + 假设清单。30 秒内能读完
 - [ ] 关键组件规约 >= 5 类
 - [ ] 占位符策略段已填
 - [ ] anti-patterns 自检无命中（或命中已解释）
+- [ ] **镜像一致性（R1.10）**：若改动过 `ui-anti-patterns.md` / `ui-aesthetics.md`，已全量同步 forge-dev / forge-review / forge-restyle 副本
 
 ## Resources
 

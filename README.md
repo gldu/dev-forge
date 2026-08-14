@@ -4,7 +4,7 @@ dev-forge 是一套面向 Claude Code、Codex、Lingma等的**编程智能体工
 
 ## 定位
 
-dev-forge 融合 **Harness Engineering、GStack、OMO、OpenSpec、Spec-Kit、Superpowers** 等工程方法学与智能体框架思想，不是单纯的代码生成器，而是一套**流程编排与质量控制体系**。它通过 20 个专业化 Skill 构成完整的工作流管道，确保每一次变更（Change）都经过需求澄清、技术设计、任务拆解、TDD 开发、五轮测试、三轮审查、集成验收的完整闭环，最终沉淀为可维护的项目级知识资产。
+dev-forge 融合 **Harness Engineering、GStack、OMO、OpenSpec、Spec-Kit、Superpowers** 等工程方法学与智能体框架思想，不是单纯的代码生成器，而是一套**流程编排与质量控制体系**。它通过 21 个专业化 Skill 构成完整的工作流管道，确保每一次变更（Change）都经过需求澄清、技术设计、任务拆解、TDD 开发、五轮测试、三轮审查、集成验收、发布部署的完整闭环，最终沉淀为可维护的项目级知识资产。
 
 ## 核心特性
 
@@ -20,15 +20,20 @@ dev-forge 融合 **Harness Engineering、GStack、OMO、OpenSpec、Spec-Kit、Su
 ```
 用户意图
     │
-    ├── 新事物 → 0-change（变更提案）
-    │                ↓
-    │           1-requirement（需求分析）
-    │                ↓
-    │           2-design（技术设计）
-    │                ↓
-    │           2a-ui-design（UI 设计，前端项目）
-    │                ↓
-    │           3-task（任务拆解）
+    ├── 直连触发（R0.1）→ 平台 description 匹配直接进入对应子 skill（如 "修这个报错" → forge-fix）
+    │        （跳过 forge-go 路由，各 skill 自带 Preflight）
+    │
+    └── 路由触发 → forge-go（R0 路由入口）
+              │
+              ├── 新事物 → 0-change（变更提案）
+              │                ↓
+              │           1-requirement（需求分析）
+              │                ↓
+              │           2-design（技术设计）
+              │                ↓
+              │           2a-ui-design（UI 设计，前端项目）
+              │                ↓
+              │           3-task（任务拆解）
     │                ↓
     │           4-dev（单任务开发 / TDD）
     │                ↓
@@ -37,6 +42,8 @@ dev-forge 融合 **Harness Engineering、GStack、OMO、OpenSpec、Spec-Kit、Su
     │           6-review（3+1 轮审查） ──(Critical/Fail)──┐
     │                ↓                                   │
     │           7-integration（集成验收 + 归档）           ↓
+    │                ↓                                   │
+    │           8-release（发布部署 · 版本推导/灰度/回滚预案）↓
     │                ▲────────────────────────── 4-dev (增量修复 T-NN)
     │
     ├── 横向命令与专项流程（不属于特定 change）
@@ -59,7 +66,7 @@ dev-forge 融合 **Harness Engineering、GStack、OMO、OpenSpec、Spec-Kit、Su
 ```
 dev-forge/
 └── skills/
-    ├── forge-go/              # 统一入口 Orchestrator — 解析意图、路由阶段、估算预算
+    ├── forge-go/              # R0 路由入口 Orchestrator — 解析意图、路由阶段、估算预算
     ├── forge-change/          # 变更提案生成器 — 澄清想法、生成 CHANGE.md
     ├── forge-requirement/     # 需求分析师 — 用户故事、AC、范围切分
     ├── forge-design/          # 技术设计师 — 技术选型、架构图、ADR、风险分析
@@ -69,6 +76,7 @@ dev-forge/
     ├── forge-test/            # 五轮测试金字塔 — 功能/性能/安全/兼容/可观测
     ├── forge-review/          # 3+1 轮审查官 — Spec 合规 / 代码质量 / UI 视觉
     ├── forge-integration/     # 集成验证与归档 — UAT、失败诊断、LESSONS 提名、归档
+    ├── forge-release/         # 发布部署 — 发布前检查、版本推导、灰度、回滚预案
     ├── forge-architect/       # 项目级架构梳理 — 模块图、ADR、跨模块契约
     ├── forge-evolve/          # 架构演进同步器 — 批量同步沉淀到 CONTEXT/ARCHITECTURE
     ├── forge-health/          # 代码库健康巡检 — 冗余/死代码/技术债扫描
@@ -100,6 +108,7 @@ dev-forge/
 | `forge-test` | 5 | Operator | `.specs/<id>/TEST.md` |
 | `forge-review` | 6 | Scout | `.specs/<id>/REVIEW.md`、fix 任务 |
 | `forge-integration` | 7 | Operator | `archive/<date>-<id>/`、CHANGELOG |
+| `forge-release` | 8 | Operator | 版本 tag、发布记录、回滚预案 |
 | `forge-architect` | A | Architect | `.specs/ARCHITECTURE.md` |
 | `forge-evolve` | E | Philosopher | `.specs/evolve/<date>-EVOLVE.md` |
 | `forge-health` | M | Scout | `.specs/health/<date>-HEALTH.md` |
@@ -139,14 +148,43 @@ dev-forge 在项目中使用 `.specs/` 目录管理所有变更级和项目级�
 │   │   └── <YYYY-MM-DD>-<change-id>/
 │   ├── health/
 │   │   └── <YYYY-MM-DD>-HEALTH.md
-│   └── evolve/
-│       └── <YYYY-MM-DD>-EVOLVE.md
+│   ├── evolve/
+│   │   └── <YYYY-MM-DD>-EVOLVE.md
+│   └── release/
+│       └── <YYYY-MM-DD>-RELEASE.md
 └── STATE.md                       # 活跃 change、当前阶段、中断任务
 ```
 
+## 安装
+
+dev-forge 遵循 [Agent Skills](https://agentskills.io) 开放标准（Skill 目录 + `SKILL.md`，frontmatter 含 `name` / `description`），Claude Code、Codex CLI、通义灵码（Lingma）等平台均原生支持。将 `skills/` 下的各 Skill 目录放到平台的加载路径即可，无需注册：
+
+| 平台 | 用户级（全局生效） | 项目级（随仓库分发） |
+|---|---|---|
+| Claude Code | `~/.claude/skills/` | `.claude/skills/` |
+| Codex CLI | `~/.agents/skills/`（旧路径 `~/.codex/skills/`） | `.agents/skills/`（仓库根目录） |
+| 通义灵码（Lingma） | `~/.lingma/skills/` | `.lingma/skills/` |
+
+**方式一：符号链接（推荐，跟随仓库更新）**
+
+```bash
+# 以用户级安装为例：将 skills/ 下全部 forge-* 链接到平台加载路径
+SRC="$(pwd)/skills"
+# Claude Code
+mkdir -p ~/.claude/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.claude/skills/"$(basename "$d")"; done
+# Codex CLI
+mkdir -p ~/.agents/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.agents/skills/"$(basename "$d")"; done
+# 通义灵码
+mkdir -p ~/.lingma/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.lingma/skills/"$(basename "$d")"; done
+```
+
+**方式二：项目内分发（团队共享）**：将 `skills/` 目录复制或链接到目标仓库的 `.claude/skills/`、`.agents/skills/` 或 `.lingma/skills/`，随仓库提交即可让团队成员共享同一套工作流。
+
+安装后重启对应 CLI（或重新打开 IDE），在对话中输入 `/` 查看已加载的 Skill 列表确认。触发依赖各 `SKILL.md` 的 `description` 语义匹配，描述写得越具体，自动触发越准。
+
 ## 使用方式
 
-dev-forge 作为编程智能体的 Skill 集合使用，兼容 Claude Code、Codex、Lingma 等支持 Skill 加载的智能体平台。将 `skills/` 下的各 Skill 目录配置到对应平台的 Skill 加载路径中，即可通过自然语言触发工作流。
+安装完成后，即可通过自然语言直接触发对应工作流。
 
 **典型入口指令示例：**
 
@@ -157,6 +195,7 @@ dev-forge 作为编程智能体的 Skill 集合使用，兼容 Claude Code、Cod
 - "安全审计" / "检查密钥泄露" → 触发 `forge-sec`，扫描硬编码 Token、OWASP 漏洞与依赖 CVE
 - "跑下压测" / "性能优化" → 触发 `forge-perf`，测量 Baseline 延迟/QPS 并开展压测优化
 - "紧急回滚" / "线上故障复盘" → 触发 `forge-rollback`，执行安全回滚与 RCA 复盘
+- "发布上线" / "发版" / "灰度发布" → 触发 `forge-release`，发布前检查、版本推导、灰度与回滚预案
 - "纯重构这个模块" → 触发 `forge-refactor`，在测试保护下重构结构且保持契约无损
 - "继续" / "恢复" → 加载 `STATE.md`，恢复中断的开发任务
 - "审查代码" → 触发 `forge-review`，执行三轮审查

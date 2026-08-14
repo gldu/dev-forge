@@ -7,7 +7,7 @@
 
 ## 你正在协作一个使用 dev-forge 流程的项目
 
-完整流程：`CHANGE → REQUIREMENT → DESIGN → TASK → DEV → TEST → REVIEW → INTEGRATION → ARCHIVE`
+完整流程：`CHANGE → REQUIREMENT → DESIGN → TASK → DEV → TEST → REVIEW → INTEGRATION → ARCHIVE → 8-release`
 
 每阶段产物存到 `.specs/<change-id>/`，跨 change 文件存到 `.specs/`：
 - `CHANGE.md` — 一次变更提案
@@ -31,6 +31,11 @@
 - 同会话同时间只扮演一个角色，切换角色必须清窗
 
 ---
+
+## R0 · 入口与路由
+
+- **R0.1 · 双入口模型** 两个合法入口，不得强制把直连请求拉回 forge-go：① **直连触发**——用户直接点名子 skill 或被平台 description 匹配（如"修这个报错"→ forge-fix），跳过 R0 路由，该 skill 自行 Preflight；② **路由触发**——经 forge-go，适用意图含混 / 新事物 / 恢复 / 跨阶段切换 / 需预算估算。
+- **R0.2 · 路由不得重复门禁** 直连进入的阶段由自身 Preflight 检查上游；forge-go 只在被路由调用时做全局 Preflight。
 
 ## R1 · 上下文与 Token
 

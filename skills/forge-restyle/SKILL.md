@@ -162,6 +162,7 @@ npx impeccable detect <component-file> # 反 AI-slop（可选）
 - [ ] 任务按"token → 组件 → 回归"三波次拆分
 - [ ] 风险通告已输出且用户已确认
 - [ ] 没有任何任务触及"不动"列内容
+- [ ] **镜像一致性（R1.10）**：若改动过 `ui-anti-patterns.md` / `ui-aesthetics.md`，已全量同步权威版 forge-ui-design 及其余镜像
 
 ## 触发下一步
 

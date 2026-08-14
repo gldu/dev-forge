@@ -1,6 +1,7 @@
 # UI 反模式清单
 
 > 来源：Anthropic `frontend-design` skill + impeccable 项目 anti-pattern 库。
+> **镜像文件**：与 `forge-ui-design/references/ui-anti-patterns.md`（权威版）一致（含完整扫描指令段）。改动必须全量同步（见 RULES R1.10）。
 
 ---
 
@@ -69,3 +70,16 @@
 | 第二个强调色 | 语义需要（成功/警告/危险） | 视觉装饰 |
 | Dark mode | 阅读/视频/编程工具 | 编辑式 / marketing |
 | Glassmorphism | 极少数玻璃 HUD 特效 | 任何 marketing 页 |
+
+---
+
+## 给 AI 的扫描指令
+
+UI 任务进入实现前：
+1. 用关键词 grep 本文件相关章节
+2. 把命中的禁忌逐条声明
+3. 实现完成后再扫一遍
+
+UI review 阶段：
+1. 把 diff 与本清单逐条比对
+2. 命中即标 Critical，追加 fix 任务

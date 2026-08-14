@@ -127,6 +127,7 @@ description: Use when performing 3+1 stage code review (3 mandatory + 1 optional
 - [ ] 每条发现都有严重度标签
 - [ ] 每个 Critical 都已生成 fix 任务
 - [ ] 报告里没有自己悄悄改过的代码
+- [ ] **镜像一致性（R1.10）**：若改动过 `ui-anti-patterns.md`，已全量同步权威版 forge-ui-design 及其余镜像
 
 ## Resources
 

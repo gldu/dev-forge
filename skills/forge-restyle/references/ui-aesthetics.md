@@ -2,6 +2,7 @@
 
 > 融合自 Anthropic 原版 `frontend-design` skill + 社区 `impeccable` 项目精华。
 > **本文件是 dev-forge 内置的"够用"基线**。
+> **超集扩展**：权威基线见 `forge-ui-design/references/ui-aesthetics.md`。本文件在权威版基础上**追加**：① 9 种调性方向逐卡片详解（关键词/参考/适合/不适合）；② 给 AI 展示用的调性选择模板。五大美学维度参数（OKLCH / 行高 1.6 / expo-out / 时长档位 / 间距 scale / 阴影 alpha ≤ 0.15）与权威版一致；若出现差异，以权威版为准（见 RULES R1.10）。
 
 ## 决策的 4 个问题（开工前必须想清楚）
 

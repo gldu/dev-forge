@@ -3,17 +3,19 @@ name: forge-go
 description: Use when standard entrance or orchestrator for dev-forge is needed, such as starting a new feature, resuming past work, running code reviews, running tests, or managing change lifecycles.
 ---
 
-# forge-go — dev-forge 统一入口
+# forge-go — dev-forge 路由入口（R0）
 
 ## Goal
 
-作为 dev-forge 编程智能体蜂群的唯一入口，解析用户一句话意图，自动完成：
+作为 dev-forge 编程智能体蜂群的**路由入口（R0）**，解析用户一句话意图，自动完成：
 1. 读取项目状态（STATE.md）
 2. 执行 Artifact Preflight Gate（检查上游工件完整性）
 3. 解析用户意图并路由到正确阶段/子 skill
 4. 估算 Token 预算并让用户选挡位
 5. 自动准备（生成 change-id、加载规则与工件）
 6. 显式声明执行计划后进入对应子 skill
+
+> **直连触发（R0.1）**：20 个子 skill 自带 description，可被平台直接触发（如"修这个报错"→ forge-fix、"审查代码"→ forge-review）。直连时**跳过 R0 路由**，各 skill 自行执行 Preflight。forge-go 负责三类场景：① 意图含混 / 新事物 / 恢复；② 跨阶段切换（0→8）；③ 需要预算估算或 Preflight 门禁兜底。两条路径的准入差异见 RULES R0.1。
 
 ## Workflow
 
@@ -40,6 +42,7 @@ description: Use when standard entrance or orchestrator for dev-forge is needed,
 | `5-test` | `REQUIREMENT.md` + `DESIGN.md` + `TASK.md` + 各 `*-SUMMARY.md` | 回缺失阶段 |
 | `6-review` | `REQUIREMENT.md` + `TASK.md` + `TEST.md` + 本次 diff | 回缺失阶段 |
 | `7-integration` | `.specs/<id>/` 下本 change 全部应有产物 | 回缺失阶段 |
+| `8-release` | 归档完成 + `REVIEW.md` + `TEST.md` + `UAT.md` 全绿 | 回 `7-integration` |
 
 Preflight 失败时输出：
 ```
@@ -67,6 +70,7 @@ Preflight 失败时输出：
 | `审查` / `review` / `检查代码` / `code review` | `6-review` | |
 | `测试` / `写测试` / `UAT` / `test` | `5-test` | |
 | `上线` / `集成` / `验收` / `ship` / `归档` | `7-integration` | |
+| `发布` / `发版` / `deploy` / `release` / `灰度发布` | `8-release` | 发布前检查 + 版本推导 + 灰度 + 回滚预案 |
 | `拆任务` / `plan tasks` / `分解` | `3-task` | |
 | `设计` + `<已有需求>` / `架构` / `design` | `2-design` | 仅当 CHANGE + REQUIREMENT 已存在 |
 | `选技术` / `选栈` / `tech stack` | `2-design` 步骤 0 | 只需技术栈选型 |
@@ -161,8 +165,9 @@ Token 预算估计：
 | 3 | `REQUIREMENT.md` + `DESIGN.md` + `UI-DESIGN.md`（前端）+ `CONTEXT.md` | — | 任务模板查询 |
 | 4 | `TASK.md`（只读当前 task 块）+ `DESIGN.md` `## 0` 段 + `UI-DESIGN.md`（UI 任务）+ `CONTEXT.md` + `LESSONS.md` | `ui-anti-patterns.md`（UI 任务 · 84 行）| — |
 | 5 | `REQUIREMENT.md` + `DESIGN.md` `## 0` 段 + `TASK.md` + 各 `*-SUMMARY.md` | `skills/forge-test/references/test-pyramid-excerpt.md` 只查适用矩阵 | — |
-| 6 | `REQUIREMENT.md` + `DESIGN.md` + `TASK.md` + `TEST.md` + `git diff` | `ui-anti-patterns.md`（前端项目第三轮 · 71 行）| — |
+| 6 | `REQUIREMENT.md` + `DESIGN.md` + `TASK.md` + `TEST.md` + `git diff` | `ui-anti-patterns.md`（前端项目第三轮 · 84 行）| — |
 | 7 | `.specs/<id>/` 全部产物 + `LESSONS.md` | — | — |
+| 8 | `CHANGELOG.md` + 归档产物 | `skills/forge-release/references/RELEASE.md` 只查「发布检查清单」| 回滚预案查 `forge-rollback` |
 
 ### 第七步 · 显式声明执行计划（必须）
 
@@ -198,6 +203,7 @@ Change-ID：<id>（已自动生成 / 已恢复活跃 change：<existing-id>）
 | `forge-test` | Operator | 所有 DEV 任务完成 | `.specs/<id>/TEST.md` |
 | `forge-review` | Scout | TEST.md 已确认 | `.specs/<id>/REVIEW.md` |
 | `forge-integration` | Operator | REVIEW.md 已通过 | `archive/<date>-<id>/` + CHANGELOG |
+| `forge-release` | Operator | 归档完成 + 用户说"发布/上线" | 版本 tag + 发布记录 |
 | `forge-restyle` | Partner | 已有项目换视觉调性 | `.specs/<id>/UI-DESIGN.md` v2 |
 | `forge-health` | Scout | 周期性巡检 / 里程碑前 / 接手项目 | `.specs/health/<date>-HEALTH.md` |
 | `forge-evolve` | Philosopher | 每月/每季度批量同步沉淀 | (阶段 E) `.specs/evolve/<date>-EVOLVE.md` + patch |

@@ -1,6 +1,7 @@
 # UI 反模式清单
 
 > 来源：Anthropic `frontend-design` skill + impeccable 项目 anti-pattern 库。
+> **权威版（canonical）**：本文件是 dev-forge 的 UI 反模式唯一权威来源。`forge-dev` / `forge-review` / `forge-restyle` 目录中的同名文件均为**镜像**（内容改动必须全量同步，见 RULES R1.10）。
 
 ---
 

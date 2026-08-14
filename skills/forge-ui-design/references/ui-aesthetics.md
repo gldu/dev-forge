@@ -1,6 +1,7 @@
 # UI 美学决策框架
 
 > 融合自 Anthropic 原版 `frontend-design` skill + 社区 `impeccable` 项目精华。
+> **权威基线（canonical）**：本文件定义 4 决策问题 + 9 调性 + 五大美学维度的权威内容。`forge-restyle/references/ui-aesthetics.md` 是其**超集扩展**（追加调性卡片详解 + 给 AI 的展示模板），五维实施层参数以本文件为准（见 RULES R1.10）。
 
 ---
 

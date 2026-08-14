@@ -9,19 +9,19 @@
 ## 标准流程
 
 ```
-CHANGE → REQUIREMENT → DESIGN → [2a UI-DESIGN]* → TASK → DEV → TEST → REVIEW → INTEGRATION → ARCHIVE
-   │          │           │            │            │      │       │         │            │
-   │          └─ CONTEXT.md 跨阶段共享 ┘     前端项目 ┘     └ TDD ─┘         │            │
-   │                                                                          │            │
-   └─────────────────────── 迭代回灌（new CHANGE） ←──────────────────────────┘            │
-                                                                                            ↓
-                                                                                     SHIP / 归档
+CHANGE → REQUIREMENT → DESIGN → [2a UI-DESIGN]* → TASK → DEV → TEST → REVIEW → INTEGRATION → ARCHIVE → 8-release
+   │          │           │            │            │      │       │         │            │            │
+   │          └─ CONTEXT.md 跨阶段共享 ┘     前端项目 ┘     └ TDD ─┘         │            │            │
+   │                                                                          │            │            │
+   └─────────────────────── 迭代回灌（new CHANGE） ←──────────────────────────┘            │            │
+                                                                                             ↓            ↓
+                                                                                         归档        发布 / SHIP
 
 * 仅前端项目走 2a；后端 / CLI / lib 跳过
 ```
 
-**前端项目路径**：`CHANGE → REQUIREMENT → DESIGN → 2a UI-DESIGN → TASK → DEV → TEST → REVIEW (3 轮) → INTEGRATION`
-**后端项目路径**：`CHANGE → REQUIREMENT → DESIGN → TASK → DEV → TEST → REVIEW → INTEGRATION`
+**前端项目路径**：`CHANGE → REQUIREMENT → DESIGN → 2a UI-DESIGN → TASK → DEV → TEST → REVIEW (3 轮) → INTEGRATION → ARCHIVE → 8-release`
+**后端项目路径**：`CHANGE → REQUIREMENT → DESIGN → TASK → DEV → TEST → REVIEW → INTEGRATION → ARCHIVE → 8-release`
 **MVP 路径**：`REQUIREMENT → DESIGN-lite → TASK → DEV`（阶段可压缩，但关键工件不能缺）
 
 ---
@@ -40,6 +40,7 @@ CHANGE → REQUIREMENT → DESIGN → [2a UI-DESIGN]* → TASK → DEV → TEST 
 | REVIEW | diff + SPEC | 双轮审查（spec 合规 + 代码质量）| `REVIEW.md` | 是（仅严重项）| 否 |
 | INTEGRATION | 全部已通过 | UAT + 集成 smoke + 失败诊断 | `UAT.md` / fix-plan | 是 | 否 |
 | ARCHIVE | 已合并 | 折叠 change 进主 spec | `archive/<date>-<name>/` | 否 | — |
+| 8-release | INTEGRATION 已通过 + 归档完成 | 发布前检查（Gate）+ 版本推导 + 灰度 + 回滚预案 | 版本 tag + 发布记录 | 是（不可逆动作）| 否 |
 
 ---
 
@@ -58,6 +59,7 @@ CHANGE → REQUIREMENT → DESIGN → [2a UI-DESIGN]* → TASK → DEV → TEST 
 | `TEST.md` | 5 轮测试金字塔报告（功能矩阵 + UAT + 性能 / 安全 / 兼容 / 可观测口供）| AI |
 | `REVIEW.md` | 审查发现（严重度 / 修复决策 / 跨模型分歧）| AI |
 | `SUMMARY.md` | 阶段产物快照（用于截断历史）| AI |
+| `release/<YYYY-MM-DD>-RELEASE.md` | 发布检查清单 + 回滚预案（8-release 阶段产出）| AI |
 | `<task-id>-PROGRESS.md` | **临时**文件——任务执行中途清窗时写入，含「已排除方案」反重复段。任务完成后删除。详见 RULES R1.5/R1.6/R1.7 | AI |
 | `LESSONS.md`（`.specs/` 根）| **项目级常驻**——跨 change 失败知识库。每个 DEV 任务开工前必扫；INTEGRATION 阶段提名新条目。详见 RULES R1.8 | AI 提名 + 人工筛 |
 | `STATE.md`（仓库根）| 跨会话状态（当前位置 / 中断任务 / 阻塞 / 决策日志）| AI 维护，人可改 |
@@ -74,6 +76,7 @@ CHANGE → REQUIREMENT → DESIGN → [2a UI-DESIGN]* → TASK → DEV → TEST 
 | **Dev**（多实例并行）| TASK 中一项 | 代码 + 任务级 SUMMARY | DEV 阶段，每任务一个 fresh context |
 | **Reviewer** | diff + SPEC | REVIEW.md | REVIEW 阶段（建议双轮：同模型 spec 审 + 异模型代码审）|
 | **Verifier** | 构建产物 + AC | UAT.md / fix-plan | INTEGRATION 阶段 |
+| **Release Manager** | 已验收 + 已归档产物 | 版本 tag + 发布记录 + 回滚预案 | 8-release 阶段 |
 
 **红线**：Architect 不写代码，UI Director 不写完整组件，Dev 不改 SPEC / UI-DESIGN，Reviewer 不修代码（只产报告 + 修复 task）。
 
