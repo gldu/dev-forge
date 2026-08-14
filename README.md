@@ -157,28 +157,43 @@ dev-forge 在项目中使用 `.specs/` 目录管理所有变更级和项目级�
 
 ## 安装
 
-dev-forge 遵循 [Agent Skills](https://agentskills.io) 开放标准（Skill 目录 + `SKILL.md`，frontmatter 含 `name` / `description`），Claude Code、Codex CLI、通义灵码（Lingma）等平台均原生支持。将 `skills/` 下的各 Skill 目录放到平台的加载路径即可，无需注册：
+dev-forge 遵循 [Agent Skills](https://agentskills.io) 开放标准（Skill 目录 + `SKILL.md`，frontmatter 含 `name` / `description`），Claude Code、Codex CLI、通义灵码（Lingma）、Antigravity、OpenCode、Pi 等平台均原生支持。将 `skills/` 下的各 Skill 目录放到平台的加载路径即可，无需注册：
 
 | 平台 | 用户级（全局生效） | 项目级（随仓库分发） |
 |---|---|---|
 | Claude Code | `~/.claude/skills/` | `.claude/skills/` |
 | Codex CLI | `~/.agents/skills/`（旧路径 `~/.codex/skills/`） | `.agents/skills/`（仓库根目录） |
 | 通义灵码（Lingma） | `~/.lingma/skills/` | `.lingma/skills/` |
+| Antigravity | `~/.gemini/config/skills/`（AGY / IDE / CLI 三端统一） | `.agents/skills/`（workspace 根，兼容旧 `.agent/skills/`） |
+| OpenCode | `~/.config/opencode/skills/`（兼容 `~/.agents/skills/`、`~/.claude/skills/`） | `.opencode/skills/`（兼容 `.agents/skills/`、`.claude/skills/`） |
+| Pi | `~/.pi/agent/skills/`（兼容 `~/.agents/skills/`） | `.pi/skills/`（兼容 `.agents/skills/`） |
+
+> 注：`.agents/skills/` 是 Codex、Antigravity、OpenCode、Pi 共同识别的项目级路径，一套项目内分发即可覆盖多个平台；全局路径各平台不同，需按平台分别链接。
 
 **方式一：符号链接（推荐，跟随仓库更新）**
 
 ```bash
-# 以用户级安装为例：将 skills/ 下全部 forge-* 链接到平台加载路径
 SRC="$(pwd)/skills"
+
+# 项目级通用路径（Codex / Antigravity / OpenCode / Pi 均识别）
+mkdir -p .agents/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" .agents/skills/"$(basename "$d")"; done
+
+# 用户级（按所用平台选择其一）
 # Claude Code
 mkdir -p ~/.claude/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.claude/skills/"$(basename "$d")"; done
 # Codex CLI
 mkdir -p ~/.agents/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.agents/skills/"$(basename "$d")"; done
 # 通义灵码
 mkdir -p ~/.lingma/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.lingma/skills/"$(basename "$d")"; done
+# Antigravity
+mkdir -p ~/.gemini/config/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.gemini/config/skills/"$(basename "$d")"; done
+# OpenCode
+mkdir -p ~/.config/opencode/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.config/opencode/skills/"$(basename "$d")"; done
+# Pi
+mkdir -p ~/.pi/agent/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.pi/agent/skills/"$(basename "$d")"; done
 ```
 
-**方式二：项目内分发（团队共享）**：将 `skills/` 目录复制或链接到目标仓库的 `.claude/skills/`、`.agents/skills/` 或 `.lingma/skills/`，随仓库提交即可让团队成员共享同一套工作流。
+**方式二：项目内分发（团队共享）**：将 `skills/` 目录复制或链接到目标仓库的 `.agents/skills/`、`.claude/skills/`、`.lingma/skills/`、`.opencode/skills/` 或 `.pi/skills/`（按团队所用平台选择，`.agents/skills/` 覆盖面最广），随仓库提交即可让团队成员共享同一套工作流。
 
 安装后重启对应 CLI（或重新打开 IDE），在对话中输入 `/` 查看已加载的 Skill 列表确认。触发依赖各 `SKILL.md` 的 `description` 语义匹配，描述写得越具体，自动触发越准。
 
