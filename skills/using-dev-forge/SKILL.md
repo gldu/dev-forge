@@ -1,0 +1,59 @@
+---
+name: using-dev-forge
+description: Use when starting any conversation - establishes how to find and use forge-* skills, requiring skill invocation before ANY response including clarifying questions
+---
+
+<SUBAGENT-STOP>
+If you were dispatched as a subagent to execute a specific task, ignore this skill.
+</SUBAGENT-STOP>
+
+<EXTREMELY-IMPORTANT>
+If you think there is even a 1% chance a forge-* skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
+
+IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
+
+This is not negotiable. You cannot rationalize your way out of this.
+</EXTREMELY-IMPORTANT>
+
+## The Rule
+
+**Invoke relevant or requested forge-* skills BEFORE any response or action** — including clarifying questions, exploring the codebase, or checking files. If it turns out wrong for the situation, you don't have to use it.
+
+Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it has a checklist, create a todo per item.
+
+## dev-forge 工作流定位
+
+dev-forge 是一个 SDLC 阶段化工作流框架。根据用户意图选择入口:
+
+- 含混意图 / 新事物 / 恢复 / 跨阶段切换 → `forge-router` (路由入口, 解析意图 + Preflight 门禁 + 预算估算)
+- 具体意图 → 直接触发对应 skill:
+  - "修这个报错" → `forge-fix`
+  - "审查代码" → `forge-review`
+  - "拆任务" → `forge-task`
+  - "实现这个任务" → `forge-dev`
+  - "跑测试" → `forge-test`
+  - "发布/上线" → `forge-release`
+  - "安全审计" → `forge-sec`
+  - "性能优化" → `forge-perf`
+  - "回滚" → `forge-rollback`
+  - "纯重构" → `forge-refactor`
+
+## Skill Priority
+
+When multiple skills apply, process skills come first — they set the approach, then implementation skills carry it out.
+
+- "我要做一个登录功能" → forge-router 路由 → forge-change → forge-requirement → forge-design → forge-task → forge-dev → ...
+- "Fix this bug" → forge-fix first.
+
+## Red Flags
+
+These thoughts mean STOP—you're rationalizing:
+
+| Thought | Reality |
+|---------|---------|
+| "This is just a simple question" | Questions are tasks. Check for skills. |
+| "I need more context first" | Skill check comes BEFORE clarifying questions. |
+| "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
+| "这个改动很小, 不用走流程" | 每个 Change 都要过 Artifact Preflight Gate。 |
+| "我直接改就行了" | 先检查是否有对应 forge-* skill。 |
+| "I remember this skill" | Skills evolve. Read current version. |
