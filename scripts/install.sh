@@ -26,15 +26,26 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Locate the repo root by walking up from SCRIPT_DIR looking for the skills/
-# directory. This supports running the script from anywhere inside the repo,
-# not only <repo>/scripts/install.sh. (I4)
+# Locate the repo root by walking up from SCRIPT_DIR. A candidate is only
+# accepted if its skills/ dir carries the dev-forge signature (forge-* or
+# using-dev-forge) — a bare skills/ in an unrelated ancestor repo must not be
+# silently linked (nested-repo misdetection). (I4)
 REPO_ROOT=""
 _candidate_dir="$SCRIPT_DIR"
+_has_sig=""
 for _depth in 1 2 3 4 5; do
   if [[ -d "$_candidate_dir/skills" ]]; then
-    REPO_ROOT="$_candidate_dir"
-    break
+    _has_sig=""
+    for _sig in "$_candidate_dir"/skills/forge-* "$_candidate_dir"/skills/using-dev-forge; do
+      if [[ -d "$_sig" ]]; then
+        _has_sig=1
+        break
+      fi
+    done
+    if [[ -n "$_has_sig" ]]; then
+      REPO_ROOT="$_candidate_dir"
+      break
+    fi
   fi
   [[ "$_candidate_dir" == "/" ]] && break
   _candidate_dir="$(dirname "$_candidate_dir")"
@@ -385,7 +396,6 @@ install_project() {
   local rel_path=""
   local dest=""
   local link_base=""
-  local plugin_dest=""
 
   if [[ -z "$platform" ]]; then
     rel_path=".agents/skills"
@@ -412,18 +422,16 @@ install_project() {
   link_base="$(relative_target "$dest")"
   install_skills "$dest" "$link_base"
 
-  # I1: project-mode opencode also needs the in-repo plugin — global mode
-  # gets it via manifest_registration -> install_opencode_plugin. Inside the
-  # dev-forge repo the plugin already ships in place, so only copy when the
-  # destination is missing (and always print the manifest hint).
+  # I1: project-mode opencode — the plugin already ships at
+  # $REPO_ROOT/.opencode/plugins/dev-forge.js (global mode copies it to the
+  # user's config via manifest_registration); here only the hint applies.
   if [[ "$platform" == "opencode" ]]; then
-    plugin_dest="$REPO_ROOT/.opencode/plugins"
     echo ""
     echo "  [manifest] opencode plugin (project)"
-    if [[ -f "$plugin_dest/dev-forge.js" ]]; then
-      echo "  [manifest] opencode plugin already in place -> $plugin_dest/dev-forge.js"
+    if [[ -f "$REPO_ROOT/.opencode/plugins/dev-forge.js" ]]; then
+      echo "  [manifest] plugin ships in-repo: $REPO_ROOT/.opencode/plugins/dev-forge.js"
     else
-      install_opencode_plugin "$plugin_dest"
+      echo "  [warn] opencode plugin source not found: $REPO_ROOT/.opencode/plugins/dev-forge.js"
     fi
   fi
 }
