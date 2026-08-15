@@ -20,11 +20,12 @@ jobs:
       - name: Check skill structure (strict)
         run: ./scripts/check-skills.sh --strict
 
-      # Deviation #1: the plan references ./scripts/lint-shell.sh --all, which
-      # belongs to a later task (P3.4) and must not be created here. Inline
-      # shellcheck instead — preinstalled on GitHub runners, guarded for
-      # portability. A present-but-failing shellcheck is a hard fail; only a
-      # MISSING shellcheck skips (loudly, never silent).
+      # Deviation #1: the plan references ./scripts/lint-shell.sh --all, but no
+      # task in the plan ever creates that script (verified: its only mentions
+      # are the design doc's file listing and this CI step). Inline shellcheck
+      # is the only self-contained option — preinstalled on GitHub runners,
+      # guarded for portability. A present-but-failing shellcheck is a hard
+      # fail; only a MISSING shellcheck skips (loudly, never silent).
       - name: Shell lint (optional)
         run: |
           if command -v shellcheck >/dev/null 2>&1; then
@@ -57,15 +58,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Deviation #2: the plan references ./scripts/bump-version.sh --check,
-      # which is created in Task 3.4 and does not exist yet. A missing script
-      # is a visible skip, never a silent `|| true` swallow of exit 127. The
-      # trailing `|| true` is kept because version drift is deliberately
-      # non-blocking — but only runs when the script actually exists.
+      # Deviation #2 (I1 follow-up): the plan references
+      # ./scripts/bump-version.sh --check, which is created in Task 3.4 and
+      # does not exist yet. A missing script is a visible skip, never a silent
+      # `|| true` swallow of exit 127. Once the script exists, its output is
+      # captured and echoed — a real drift/check error stays fully visible
+      # while the job remains green (version drift is deliberately
+      # non-blocking).
       - name: Check version drift
         run: |
           if [ -x ./scripts/bump-version.sh ]; then
-            ./scripts/bump-version.sh --check || true
+            if ! out="$(./scripts/bump-version.sh --check 2>&1)"; then
+              echo "version drift or check error (non-blocking):"
+              echo "$out"
+            else
+              echo "$out"
+            fi
           else
             echo "version check skipped: scripts/bump-version.sh not yet present (Task 3.4)"
           fi

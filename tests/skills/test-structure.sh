@@ -41,6 +41,7 @@ die() {
 
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/df-structure-test.XXXXXX")"
 
+# shellcheck disable=SC2012  # ls parsing is safe: skill dir names are repo-controlled (forge-[A-Za-z0-9_-]+ / using-dev-forge), never non-alphanumeric
 EXPECTED_SKILLS="$(ls -d "$REPO_ROOT"/skills/*/ 2>/dev/null | wc -l | tr -d ' ')"
 [[ -n "$EXPECTED_SKILLS" && "$EXPECTED_SKILLS" -gt 0 ]] \
   || die "no skill directories found under $REPO_ROOT/skills"

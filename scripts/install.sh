@@ -273,15 +273,11 @@ interactive_platform_menu() {
 
 # Copy the opencode plugin into the target opencode plugins dir.
 # Never aborts the install if the copy fails — skills are the primary payload.
-# $1 (optional) overrides the destination; the default honours
-# OPENCODE_CONFIG_DIR when set (I2).
+# The destination honours OPENCODE_CONFIG_DIR when set (I2); there is no
+# caller-supplied override (the sole call site never passes one).
 install_opencode_plugin() {
-  local dest="${1:-}"
+  local dest="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}/plugins"
   local src="$REPO_ROOT/.opencode/plugins/dev-forge.js"
-
-  if [[ -z "$dest" ]]; then
-    dest="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}/plugins"
-  fi
 
   if [[ ! -f "$src" ]]; then
     echo "  [manifest] opencode plugin source not found: $src (skipping)"

@@ -275,6 +275,7 @@ mkdir -p "$TMP_REPO" "$FAKE_HOME"
 cp -R "$REPO_ROOT/scripts" "$REPO_ROOT/skills" "$TMP_REPO/"
 
 SKILLS_SRC="$TMP_REPO/skills"
+# shellcheck disable=SC2012  # ls parsing is safe: skill names follow the repo contract (forge-[A-Za-z0-9_-]+ / using-dev-forge), never non-alphanumeric
 EXPECTED_COUNT="$(ls -d "$SKILLS_SRC"/forge-* "$SKILLS_SRC"/using-dev-forge 2>/dev/null | wc -l | tr -d ' ')"
 [[ "$EXPECTED_COUNT" -gt 0 ]] || die "no skills found in temp repo copy: $SKILLS_SRC"
 

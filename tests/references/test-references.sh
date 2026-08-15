@@ -181,7 +181,12 @@ EOF
   (
     REPO_ROOT="$corpus"
     SKILLS_DIR="$corpus/skills"
+    # Intentional: run_checks reuses the global counter names inside this
+    # subshell so it needs no parameterization; the outer real-repo run's
+    # FAIL_COUNT/CHECKED (read in the summary below) are never touched.
+    # shellcheck disable=SC2030
     FAIL_COUNT=0
+    # shellcheck disable=SC2030
     CHECKED=0
     run_checks
   ) >/dev/null 2> "$self_err"
@@ -224,10 +229,13 @@ EOF
 
 run_checks
 
+# shellcheck disable=SC2031  # outer real-repo counters; the corpus subshell's copies are local (see verify_corpus)
 if [[ "$FAIL_COUNT" -gt 0 ]]; then
+  # shellcheck disable=SC2031
   echo "REFERENCES TESTS: $FAIL_COUNT failure(s), $CHECKED skills checked" >&2
   exit 1
 fi
+# shellcheck disable=SC2031
 echo "PASS: $CHECKED skills checked, all reference paths resolve"
 
 # --- I2: mirror-vs-checker cross-check on a synthetic corpus ---
