@@ -40,6 +40,9 @@ die() {
   exit 1
 }
 
+# M8: this test takes no arguments — reject any with a clear message.
+[[ $# -eq 0 ]] || die "unexpected argument(s): $*"
+
 pass() {
   PASS_COUNT=$((PASS_COUNT + 1))
   echo "PASS: $1"
@@ -82,7 +85,13 @@ assert "hookSpecificOutput" not in d, \
 v = d["additional_context"]
 assert isinstance(v, str) and v.strip(), "additional_context must be a non-empty string"
 assert "using-dev-forge" in v, "additional_context should mention the using-dev-forge skill"
-assert len(v) > 500, "additional_context looks truncated (len %d)" % len(v)
+# M5: assert semantic completeness instead of a length heuristic — the wrapper
+# close tag and the skill's final line must both be present, so a truncated
+# injection fails even when it is still long.
+assert "</EXTREMELY_IMPORTANT>" in v, \
+    "additional_context missing closing </EXTREMELY_IMPORTANT> wrapper"
+assert "Skills evolve. Read current version." in v, \
+    "additional_context truncated: missing using-dev-forge tail"
 PY
 }
 
@@ -104,7 +113,10 @@ assert isinstance(v, str) and v.strip(), \
     "hookSpecificOutput.additionalContext must be a non-empty string"
 assert "using-dev-forge" in v, \
     "hookSpecificOutput.additionalContext should mention the using-dev-forge skill"
-assert len(v) > 500, "hookSpecificOutput.additionalContext looks truncated (len %d)" % len(v)
+assert "</EXTREMELY_IMPORTANT>" in v, \
+    "hookSpecificOutput.additionalContext missing closing </EXTREMELY_IMPORTANT> wrapper"
+assert "Skills evolve. Read current version." in v, \
+    "hookSpecificOutput.additionalContext truncated: missing using-dev-forge tail"
 PY
 }
 
@@ -121,7 +133,10 @@ assert "additional_context" not in d, "SDK default JSON must not contain 'additi
 v = d["additionalContext"]
 assert isinstance(v, str) and v.strip(), "additionalContext must be a non-empty string"
 assert "using-dev-forge" in v, "additionalContext should mention the using-dev-forge skill"
-assert len(v) > 500, "additionalContext looks truncated (len %d)" % len(v)
+assert "</EXTREMELY_IMPORTANT>" in v, \
+    "additionalContext missing closing </EXTREMELY_IMPORTANT> wrapper"
+assert "Skills evolve. Read current version." in v, \
+    "additionalContext truncated: missing using-dev-forge tail"
 PY
 }
 

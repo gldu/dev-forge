@@ -11,6 +11,12 @@
 # The success-line assertion uses the skill count the checker actually reports
 # (currently 22), so the grep stays valid if the skill set grows.
 #
+# I1: a negative self-check runs the checker against a structurally broken
+# fixture (missing `description:` frontmatter + a broken reference) inside a
+# temp repo and asserts exit 1 with both problems flagged — so a regression
+# that makes the checker ACCEPT broken skills fails this suite, not just a
+# regression that rejects healthy ones.
+#
 # bash 3.2.57 (macOS /bin/bash) compatible; no external dependencies.
 set -euo pipefail
 
@@ -27,6 +33,9 @@ die() {
   echo "error: $*" >&2
   exit 1
 }
+
+# M8: this test takes no arguments — reject any with a clear message.
+[[ $# -eq 0 ]] || die "unexpected argument(s): $*"
 
 [[ -f "$CHECKER" ]] || die "check-skills.sh not found: $CHECKER"
 
@@ -61,4 +70,43 @@ if ! grep -q "all ${EXPECTED_SKILLS} skills OK" "$TMP_DIR/out"; then
 fi
 
 echo "PASS: check-skills.sh exit 0, all ${EXPECTED_SKILLS} skills OK"
+
+# I1 — negative self-check: the checker must REJECT a structurally broken
+# skill (missing `description:` frontmatter + a broken reference), exit 1, and
+# flag both problems. The checker locates skills/ relative to its own script
+# location, so a throwaway copy in a temp repo exercises the fixture without
+# touching the real repo.
+BAD_REPO="$TMP_DIR/bad-repo"
+mkdir -p "$BAD_REPO/scripts" "$BAD_REPO/skills/bad-skill"
+cp "$CHECKER" "$BAD_REPO/scripts/check-skills.sh"
+cat > "$BAD_REPO/skills/bad-skill/SKILL.md" <<'EOF'
+---
+name: bad-skill
+---
+# Bad skill
+
+This skill has no description frontmatter and references a missing file:
+references/ghost.md
+EOF
+
+if "$BAD_REPO/scripts/check-skills.sh" > "$TMP_DIR/bad-out" 2> "$TMP_DIR/bad-err"; then
+  echo "FAIL: check-skills.sh exited 0 on the broken fixture (expected 1)" >&2
+  echo "--- check-skills.sh stdout ---" >&2
+  cat "$TMP_DIR/bad-out" >&2
+  exit 1
+fi
+if ! grep -q "frontmatter missing 'description:' field" "$TMP_DIR/bad-err"; then
+  echo "FAIL: broken fixture did not flag the missing description" >&2
+  echo "--- check-skills.sh stderr ---" >&2
+  cat "$TMP_DIR/bad-err" >&2
+  exit 1
+fi
+if ! grep -q "broken reference 'references/ghost.md'" "$TMP_DIR/bad-err"; then
+  echo "FAIL: broken fixture did not flag the broken reference" >&2
+  echo "--- check-skills.sh stderr ---" >&2
+  cat "$TMP_DIR/bad-err" >&2
+  exit 1
+fi
+
+echo "PASS: negative self-check — checker exits 1 on broken skill (missing description + broken reference)"
 echo "ALL STRUCTURE TESTS PASSED"

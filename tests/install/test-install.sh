@@ -16,8 +16,13 @@
 #   * project mode, --platform claude -> .claude/skills (platform-specific
 #     path from the README installation table).
 #   * global mode with a fake $HOME -> $FAKE_HOME/.claude/skills (absolute
-#     targets into the real repo's skills/).
-#   * negatives — unknown platform and empty --platform must exit non-zero.
+#     targets into the real repo's skills/; platform-detection env vars are
+#     scrubbed so a leaked var can never silently steer the run).
+#   * negatives — unknown platform and empty --platform must exit non-zero
+#     AND name the exact rejection (M1: no silent fallthrough).
+#   * C1 guard (I3) — a REAL directory shadowing a skill name must be refused
+#     with "refusing to overwrite", not silently nested into (the macOS
+#     `ln -sfn` regression install.sh defends against).
 #
 # bash 3.2.57 (macOS /bin/bash) compatible AND Linux (ubuntu-latest, P3.3 CI)
 # compatible: no mapfile, no GNU-only tools, mktemp under ${TMPDIR:-/tmp}.
@@ -41,6 +46,9 @@ die() {
   echo "error: $*" >&2
   exit 1
 }
+
+# M8: this test takes no arguments — reject any with a clear message.
+[[ $# -eq 0 ]] || die "unexpected argument(s): $*"
 
 pass() {
   PASS_COUNT=$((PASS_COUNT + 1))
@@ -108,6 +116,12 @@ assert_links() {
   rl="$(readlink "$dest/using-dev-forge" 2>/dev/null || true)"
   if [[ "$expect_relative" == 1 && -n "$rl" && "$rl" == /* ]]; then
     echo "project link target is absolute (expected relative): $dest/using-dev-forge -> $rl" >&2
+    return 1
+  fi
+  # M2: global-mode targets must be absolute (they point at the real repo's
+  # skills/, which can live anywhere on the machine).
+  if [[ "$expect_relative" == 0 && -n "$rl" && "$rl" != /* ]]; then
+    echo "global link target is relative (expected absolute): $dest/using-dev-forge -> $rl" >&2
     return 1
   fi
 
@@ -178,8 +192,11 @@ run_project_claude() {
 run_global_claude() {
   local dest="$FAKE_HOME/.claude/skills"
   # Global mode installs under $HOME; a fake HOME keeps the real user env
-  # untouched. Targets are absolute (real repo skills/).
-  if ! env HOME="$FAKE_HOME" "$INSTALLER" --global --platform claude > "$TMP_DIR/global.log" 2>&1; then
+  # untouched. Targets are absolute (real repo skills/). M3: platform-detection
+  # env vars are scrubbed so a leaked var can never silently steer the run
+  # (e.g. OPENCODE_CONFIG_DIR redirecting an opencode install elsewhere).
+  if ! env -u OPENCODE_CONFIG_DIR -u CLAUDE_PLUGIN_ROOT -u CURSOR_PLUGIN_ROOT -u COPILOT_CLI \
+       HOME="$FAKE_HOME" "$INSTALLER" --global --platform claude > "$TMP_DIR/global.log" 2>&1; then
     echo "install.sh --global --platform claude exited non-zero; log:" >&2
     cat "$TMP_DIR/global.log" >&2
     return 1
@@ -195,12 +212,49 @@ run_negative_unknown_platform() {
     echo "expected non-zero exit for unknown platform, got 0" >&2
     return 1
   fi
+  # M1: assert the exact rejection text, not just the exit code.
+  if ! grep -q "unknown platform: bogus" "$TMP_DIR/neg1.log"; then
+    echo "install.sh stderr missing 'unknown platform: bogus'; log:" >&2
+    cat "$TMP_DIR/neg1.log" >&2
+    return 1
+  fi
   return 0
 }
 
 run_negative_empty_platform() {
   if "$TMP_REPO/scripts/install.sh" --project --platform "" > "$TMP_DIR/neg2.log" 2>&1; then
     echo "expected non-zero exit for empty --platform, got 0" >&2
+    return 1
+  fi
+  # M1: assert the exact rejection text, not just the exit code.
+  if ! grep -q "non-empty argument" "$TMP_DIR/neg2.log"; then
+    echo "install.sh stderr missing 'non-empty argument' rejection; log:" >&2
+    cat "$TMP_DIR/neg2.log" >&2
+    return 1
+  fi
+  return 0
+}
+
+# --- C1 guard (I3): a real directory shadowing a skill name must be refused ---
+
+run_refuse_real_dir() {
+  local dest="$TMP_REPO/.agents/skills"
+  # Earlier checks left forge-router as a symlink; replace it with a REAL dir.
+  rm -f "$dest/forge-router"
+  mkdir -p "$dest/forge-router"
+
+  if "$TMP_REPO/scripts/install.sh" --project > "$TMP_DIR/refuse.log" 2>&1; then
+    echo "expected non-zero exit when 'forge-router' is a real directory, got 0" >&2
+    cat "$TMP_DIR/refuse.log" >&2
+    return 1
+  fi
+  if ! grep -q "refusing to overwrite" "$TMP_DIR/refuse.log"; then
+    echo "install.sh stderr missing 'refusing to overwrite'; log:" >&2
+    cat "$TMP_DIR/refuse.log" >&2
+    return 1
+  fi
+  if [[ ! -d "$dest/forge-router" || -L "$dest/forge-router" ]]; then
+    echo "real directory '$dest/forge-router' was clobbered (C1 guard failed)" >&2
     return 1
   fi
   return 0
@@ -243,6 +297,9 @@ check "unknown platform exits non-zero" \
 
 check "empty --platform exits non-zero" \
   run_negative_empty_platform
+
+check "install refuses to overwrite a real directory shadowing a skill (C1)" \
+  run_refuse_real_dir
 
 # --- summary ---
 
