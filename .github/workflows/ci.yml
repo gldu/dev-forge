@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check skill structure
+        run: ./scripts/check-skills.sh
+
+      # Deviation #4: the plan only runs the plain mode; --strict adds the
+      # frontmatter-line-1 / non-empty references / non-empty target checks as
+      # a hard gate. Locally verified green in both modes.
+      - name: Check skill structure (strict)
+        run: ./scripts/check-skills.sh --strict
+
+      # Deviation #1: the plan references ./scripts/lint-shell.sh --all, which
+      # belongs to a later task (P3.4) and must not be created here. Inline
+      # shellcheck instead — preinstalled on GitHub runners, guarded for
+      # portability. A present-but-failing shellcheck is a hard fail; only a
+      # MISSING shellcheck skips (loudly, never silent).
+      - name: Shell lint (optional)
+        run: |
+          if command -v shellcheck >/dev/null 2>&1; then
+            shellcheck scripts/*.sh hooks/session-start tests/*/*.sh
+          else
+            echo "shellcheck not available; skipping shell lint"
+          fi
+
+  test:
+    # Deviation #3: the plan only runs ubuntu-latest; the matrix adds
+    # macos-latest because this repo's C1-class bugs are macOS-specific
+    # (/var -> /private/var symlink root, BSD ln -sfn silent nesting), and the
+    # tests' built-in cd -P physical-resolution guards only truly fire there.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests
+        run: |
+          ./tests/hooks/test-session-start.sh
+          ./tests/skills/test-structure.sh
+          ./tests/install/test-install.sh
+          ./tests/references/test-references.sh
+
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Deviation #2: the plan references ./scripts/bump-version.sh --check,
+      # which is created in Task 3.4 and does not exist yet. A missing script
+      # is a visible skip, never a silent `|| true` swallow of exit 127. The
+      # trailing `|| true` is kept because version drift is deliberately
+      # non-blocking — but only runs when the script actually exists.
+      - name: Check version drift
+        run: |
+          if [ -x ./scripts/bump-version.sh ]; then
+            ./scripts/bump-version.sh --check || true
+          else
+            echo "version check skipped: scripts/bump-version.sh not yet present (Task 3.4)"
+          fi
