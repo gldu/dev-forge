@@ -13,7 +13,8 @@
 # links once; sync-to-local.sh re-creates them so the target keeps pointing at
 # the fresh checkout. Default link targets are relative (they survive repo
 # clones and CI checkouts); pass --absolute when the target lives outside this
-# repo and you prefer self-describing absolute links.
+# repo — in particular when it is reached through a symlinked root (macOS
+# /var -> /private/var, /tmp -> /private/tmp), where no relative path exists.
 #
 # Inherits install.sh's hardened patterns: refuses to overwrite a real
 # directory that shares a skill name (macOS `ln -sfn` would silently nest a
@@ -21,6 +22,9 @@
 #
 set -euo pipefail
 
+# Companion tool that ships inside the repo (scripts/ next to skills/) — the
+# root is always one level up; no install.sh-style signature walk-up needed.
+# (M3: deliberately kept simple — this script is only ever run from a checkout.)
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SKILLS_SRC="$REPO_ROOT/skills"
@@ -82,15 +86,32 @@ sync_skills() {
     mkdir -p "$target" || die "could not create target directory: $target"
   fi
   # Normalize to an absolute path so relative targets are computed against
-  # the real location (handles '.' / '..' in the argument).
-  target_abs="$(cd "$target" 2>/dev/null && pwd)" && target="$target_abs"
+  # the real location (handles '.' / '..' in the argument). A missing target
+  # is fatal even under --dry-run — the preview would be fabricated (I1).
+  if ! target_abs="$(cd "$target" 2>&1 && pwd)"; then
+    die "target directory does not exist (and --dry-run does not create it): $target"
+  fi
+  target="$target_abs"
+
+  # M1/M2: never sync into the skills source directory or one of its
+  # subdirectories — the links would point at themselves or a parent.
+  if [[ "$target" == "$SKILLS_SRC" || "$target" == "$SKILLS_SRC/"* ]]; then
+    die "refusing to sync into the skills source directory (or a subdirectory): $target"
+  fi
 
   if [[ "$USE_ABSOLUTE" == true ]]; then
     link_target="$SKILLS_SRC"
   else
     link_target="$(relative_target "$target")"
-    if [[ -z "$link_target" ]]; then
-      die "refusing to sync into the skills source directory itself: $target"
+    # C1: relative targets are only valid when a PHYSICAL walk from $target
+    # through $link_target lands on $SKILLS_SRC. Text-counting `../` breaks
+    # under symlinked roots (macOS /var -> /private/var, /tmp -> /private/tmp):
+    # every link would silently dangle while `[[ -L ]]` still passes. The -P
+    # flags are load-bearing: plain (logical) cd resolves `..` against the
+    # textual $PWD and misses this — verified false negative on bash 3.2.57.
+    if ! ( cd -P "$target" && cd -P "$link_target" 2>/dev/null &&
+           [[ "$(pwd -P)" == "$(cd -P "$SKILLS_SRC" && pwd -P)" ]] ); then
+      die "cannot express $SKILLS_SRC relative to $target (symlinked path on macOS); use --absolute"
     fi
   fi
 
@@ -107,8 +128,11 @@ sync_skills() {
       printf 'ln -sfn %s/%s %s/%s\n' "$link_target" "$name" "$target" "$name"
     else
       ln -sfn "$link_target/$name" "$target/$name" || die "failed to link '$link_target/$name' -> '$target/$name'"
-      # M5: post-link self-check — the entry must actually be a symlink now.
+      # M5: post-link self-check — the entry must be a symlink AND resolve.
+      # The -e test follows the link with kernel semantics, so a dangling
+      # relative link can never pass (defense in depth for C1).
       [[ -L "$target/$name" ]] || die "self-check failed: '$target/$name' is not a symlink after sync"
+      [[ -e "$target/$name" ]] || die "self-check failed: '$target/$name' is a DANGLING link (relative base '$link_target' does not resolve); use --absolute"
     fi
     count=$((count + 1))
   done
