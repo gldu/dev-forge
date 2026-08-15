@@ -15,13 +15,34 @@
 # Falls back to an interactive numbered menu when none can be detected.
 #
 # Skill paths follow the README installation table. Global paths live under
-# $HOME; project paths are written relative to this repo (copy this script
-# into a target repo for in-repo team distribution).
+# $HOME; project paths are written relative to this repo (symlinks use
+# relative targets so they survive repo clones / CI checkouts).
+#
+# This script links BOTH forge-* skills and using-dev-forge — one skill
+# beyond the README "Option 1" snippet (forge-* only); the script is the
+# source of truth.
 #
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Locate the repo root by walking up from SCRIPT_DIR looking for the skills/
+# directory. This supports running the script from anywhere inside the repo,
+# not only <repo>/scripts/install.sh. (I4)
+REPO_ROOT=""
+_candidate_dir="$SCRIPT_DIR"
+for _depth in 1 2 3 4 5; do
+  if [[ -d "$_candidate_dir/skills" ]]; then
+    REPO_ROOT="$_candidate_dir"
+    break
+  fi
+  [[ "$_candidate_dir" == "/" ]] && break
+  _candidate_dir="$(dirname "$_candidate_dir")"
+done
+if [[ -z "$REPO_ROOT" ]]; then
+  echo "error: could not locate this repo's 'skills/' directory; install.sh must live inside the dev-forge repo (e.g. <repo>/scripts/install.sh)" >&2
+  exit 1
+fi
 SKILLS_SRC="$REPO_ROOT/skills"
 
 # org placeholder — replace <org> with the real GitHub org before publishing
@@ -32,7 +53,7 @@ PLATFORM=""
 SHOW_LIST=false
 
 usage() {
-  sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+  awk 'NR == 1 { next } /^set -euo pipefail$/ { exit } { print }' "$0" | sed 's/^# \{0,1\}//'
 }
 
 die() {
@@ -114,12 +135,47 @@ project_skills_path() {
   esac
 }
 
+# Print the path from directory $1 to $SKILLS_SRC in relative form, so
+# project-mode symlinks use relative targets (they survive repo clones and CI
+# checkouts). Pure bash — no GNU realpath needed. (I3)
+relative_target() {
+  local from="$1"
+  local to="$SKILLS_SRC"
+  local from_parts to_parts
+  local common=0 i="" up="" rest=""
+  local IFS='/'
+  from="${from%/}"
+  to="${to%/}"
+  read -r -a from_parts <<< "${from#/}"
+  read -r -a to_parts <<< "${to#/}"
+  while [[ $common -lt ${#from_parts[@]} && $common -lt ${#to_parts[@]} && "${from_parts[$common]}" == "${to_parts[$common]}" ]]; do
+    common=$((common + 1))
+  done
+  i=$common
+  while [[ $i -lt ${#from_parts[@]} ]]; do
+    up="${up}../"
+    i=$((i + 1))
+  done
+  i=$common
+  while [[ $i -lt ${#to_parts[@]} ]]; do
+    rest="${rest}${to_parts[$i]}"
+    i=$((i + 1))
+    [[ $i -lt ${#to_parts[@]} ]] && rest="${rest}/"
+  done
+  echo "${up}${rest}"
+}
+
 # Symlink every skill directory (forge-* + using-dev-forge) into $dest.
-# Symlinks keep the installed skills in sync with the repo.
+# Symlinks keep the installed skills in sync with the repo. Single loop over
+# a glob list instead of two copy-pasted loops (M8). NOTE: this script also
+# links using-dev-forge, which the README "Option 1" snippet does not show
+# (M7 — README is handled separately; the script is the source of truth).
+#
+# $2 is the link-target base: absolute $SKILLS_SRC in global mode, a relative
+# path in project mode (I3).
 install_skills() {
-  local dest="$1"
-  local count=0
-  local d
+  local dest="$1" base="$2"
+  local count=0 d name
 
   if [[ ! -d "$SKILLS_SRC" ]]; then
     die "skills directory not found: $SKILLS_SRC"
@@ -127,15 +183,18 @@ install_skills() {
 
   mkdir -p "$dest"
 
-  for d in "$SKILLS_SRC"/forge-*; do
+  for d in "$SKILLS_SRC"/forge-* "$SKILLS_SRC"/using-dev-forge; do
     [[ -d "$d" ]] || continue
-    ln -sfn "$d" "$dest/$(basename "$d")"
-    count=$((count + 1))
-  done
-
-  for d in "$SKILLS_SRC"/using-dev-forge; do
-    [[ -d "$d" ]] || continue
-    ln -sfn "$d" "$dest/$(basename "$d")"
+    name="$(basename "$d")"
+    # C1: macOS `ln -sfn` silently nests a same-named real directory instead
+    # of failing — refuse it up front. Existing symlinks pass through, so
+    # idempotent re-runs are unaffected.
+    if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
+      die "refusing to overwrite existing non-symlink '$dest/$name' (real file/dir); move it aside first"
+    fi
+    ln -sfn "$base/$name" "$dest/$name" || die "failed to link '$base/$name' -> '$dest/$name'"
+    # M5: post-install self-check — the entry must actually be a symlink now.
+    [[ -L "$dest/$name" ]] || die "self-check failed: '$dest/$name' is not a symlink after install"
     count=$((count + 1))
   done
 
@@ -163,7 +222,7 @@ detect_platform() {
   if [[ -t 0 ]]; then
     interactive_platform_menu
   else
-    echo "could not auto-detect platform and stdin is not interactive; pass --platform <name> (see --list)" >&2
+    # M2: no stderr echo here — main() reports the final error via || die
     return 1
   fi
 }
@@ -186,18 +245,32 @@ interactive_platform_menu() {
   printf 'Select [1-%d]: ' "$((last + 1))" >&2
   IFS= read -r choice
 
+  # M3: "quit" is a clean, explicit abort — sentinel handled in main(), so it
+  # never falls through to the "could not auto-detect platform" error path.
+  if [[ "$choice" == "quit" ]] || [[ "$choice" == "$((last + 1))" ]]; then
+    echo "__dev_forge_quit__"
+    return 0
+  fi
+
   if [[ ! "$choice" =~ ^[0-9]+$ ]] || ((choice < 1 || choice > last)); then
-    echo "" >&2
+    echo "invalid selection" >&2
+    echo ""
     return 1
   fi
   echo "${platforms[$((choice - 1))]}"
 }
 
-# Copy the opencode plugin into the user's opencode plugins dir.
+# Copy the opencode plugin into the target opencode plugins dir.
 # Never aborts the install if the copy fails — skills are the primary payload.
+# $1 (optional) overrides the destination; the default honours
+# OPENCODE_CONFIG_DIR when set (I2).
 install_opencode_plugin() {
+  local dest="${1:-}"
   local src="$REPO_ROOT/.opencode/plugins/dev-forge.js"
-  local dest="$HOME/.config/opencode/plugins"
+
+  if [[ -z "$dest" ]]; then
+    dest="${OPENCODE_CONFIG_DIR:-$HOME/.config/opencode}/plugins"
+  fi
 
   if [[ ! -f "$src" ]]; then
     echo "  [manifest] opencode plugin source not found: $src (skipping)"
@@ -219,7 +292,7 @@ manifest_path() {
     pi) echo ".pi/extensions/dev-forge.ts" ;;
     gemini) echo "gemini-extension.json" ;;
     cursor) echo ".cursor-plugin/plugin.json" ;;
-    copilot) echo "(no in-repo manifest yet)" ;;
+    copilot) echo "" ;; # M1: no in-repo manifest yet — return nothing, never a path
   esac
 }
 
@@ -230,6 +303,9 @@ manifest_registration() {
     claude)
       echo ""
       echo "  [manifest] Claude Code plugin marketplace:"
+      if [[ "$ORG_PLACEHOLDER" == "<org>" ]]; then
+        echo "  [warn] ORG_PLACEHOLDER still contains the literal '<org>' — edit scripts/install.sh before publishing"
+      fi
       echo "    claude plugin marketplace add ${ORG_PLACEHOLDER}/dev-forge"
       echo "    claude plugin install dev-forge"
       echo "    (hooks ship with the plugin; source: .claude-plugin/marketplace.json)"
@@ -248,10 +324,14 @@ manifest_registration() {
       echo ""
       install_opencode_plugin
       ;;
-    devin | kimi | hermes | pi | gemini | copilot)
+    devin | kimi | hermes | pi | gemini)
       echo ""
       echo "  [manifest] $1 manifest lives in the repo; install per its platform docs:"
       echo "    $REPO_ROOT/$(manifest_path "$1")"
+      ;;
+    copilot)
+      echo ""
+      echo "  [manifest] copilot: no in-repo manifest yet; nothing to register"
       ;;
   esac
 }
@@ -284,8 +364,14 @@ install_global() {
   rel_path="$(global_skills_path "$platform")"
   if [[ -n "$rel_path" ]]; then
     dest="$HOME/$rel_path"
+    # I2: OPENCODE_CONFIG_DIR is what detect_platform keys on — install into
+    # the same base so the install doesn't "succeed" in the wrong place.
+    if [[ "$platform" == "opencode" && -n "${OPENCODE_CONFIG_DIR:-}" ]]; then
+      dest="$OPENCODE_CONFIG_DIR/skills"
+      echo "  [warn] OPENCODE_CONFIG_DIR is set; installing opencode skills to $dest (overrides $HOME/.config/opencode/skills)"
+    fi
     echo "[1/2] installing skills for '$platform' -> $dest"
-    install_skills "$dest"
+    install_skills "$dest" "$SKILLS_SRC"
   else
     echo "[1/2] '$platform' has no standard global skills path; skills skipped"
   fi
@@ -298,23 +384,48 @@ install_project() {
   local platform="$1"
   local rel_path=""
   local dest=""
+  local link_base=""
+  local plugin_dest=""
 
   if [[ -z "$platform" ]]; then
     rel_path=".agents/skills"
-    echo "[project] installing skills to shared path -> $REPO_ROOT/$rel_path"
-    install_skills "$REPO_ROOT/$rel_path"
+    dest="$REPO_ROOT/$rel_path"
+    echo "[project] installing skills to shared path -> $dest"
+    link_base="$(relative_target "$dest")"
+    install_skills "$dest" "$link_base"
     return 0
   fi
 
   rel_path="$(project_skills_path "$platform")"
   if [[ -z "$rel_path" ]]; then
     echo "[project] '$platform' has no project-level skills path; skills skipped"
-    echo "          (manifest stays in the repo: $REPO_ROOT/$(manifest_path "$platform"))"
+    if [[ -n "$(manifest_path "$platform")" ]]; then
+      echo "          (manifest stays in the repo: $REPO_ROOT/$(manifest_path "$platform"))"
+    else
+      echo "          (no in-repo manifest for '$platform')"
+    fi
     return 0
   fi
 
-  echo "[project] installing skills for '$platform' -> $REPO_ROOT/$rel_path"
-  install_skills "$REPO_ROOT/$rel_path"
+  dest="$REPO_ROOT/$rel_path"
+  echo "[project] installing skills for '$platform' -> $dest"
+  link_base="$(relative_target "$dest")"
+  install_skills "$dest" "$link_base"
+
+  # I1: project-mode opencode also needs the in-repo plugin — global mode
+  # gets it via manifest_registration -> install_opencode_plugin. Inside the
+  # dev-forge repo the plugin already ships in place, so only copy when the
+  # destination is missing (and always print the manifest hint).
+  if [[ "$platform" == "opencode" ]]; then
+    plugin_dest="$REPO_ROOT/.opencode/plugins"
+    echo ""
+    echo "  [manifest] opencode plugin (project)"
+    if [[ -f "$plugin_dest/dev-forge.js" ]]; then
+      echo "  [manifest] opencode plugin already in place -> $plugin_dest/dev-forge.js"
+    else
+      install_opencode_plugin "$plugin_dest"
+    fi
+  fi
 }
 
 parse_args() {
@@ -330,6 +441,8 @@ parse_args() {
         shift
         [[ $# -ge 1 ]] || die "option --platform requires an argument"
         PLATFORM="$1"
+        # M4: reject an explicitly empty value, e.g. --platform ""
+        [[ -n "$PLATFORM" ]] || die "option --platform requires a non-empty argument"
         ;;
       --list)
         SHOW_LIST=true
@@ -362,6 +475,10 @@ main() {
 
   if [[ -z "$PLATFORM" && "$MODE" == "global" ]]; then
     PLATFORM="$(detect_platform)" || die "could not auto-detect platform; pass --platform <name> (see --list)"
+    if [[ "$PLATFORM" == "__dev_forge_quit__" ]]; then
+      echo "install aborted."
+      exit 0
+    fi
     echo "detected platform: $PLATFORM"
   fi
 
