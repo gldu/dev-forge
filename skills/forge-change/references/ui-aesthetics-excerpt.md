@@ -1,6 +1,6 @@
 # UI 美学 — 0-change 调性预选节选
 
-> 本文件仅含 forge-change 步骤 0.6 所需的「调性」一节。完整决策框架见 `references/ui-aesthetics.md`（forge-ui-design 使用）。
+> 本文件仅含 forge-change 步骤 0.6 所需的「调性」一节。完整决策框架见 `forge-ui-design/references/ui-aesthetics.md`（forge-ui-design 使用）。
 
 ---
 

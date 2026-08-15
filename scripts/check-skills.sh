@@ -60,24 +60,25 @@ fail() {
 }
 
 # Print the value of the `name:` frontmatter field, or "" when absent.
-# The `NR == 1 && $0 != "---"` guard means a block buried below line 1 is not
-# treated as frontmatter — the file then reads as "no name field".
+# Line-1 guard uses the same boundary regex as the closing delimiter so CRLF
+# files (`---\r`) parse as frontmatter; values are right-trimmed so CRLF `\r`
+# and trailing spaces never false-FAIL (YAML trims both).
 frontmatter_name() {
   awk '
-    NR == 1 && $0 != "---" { exit }
+    NR == 1 && $0 !~ /^---[[:space:]]*$/ { exit }
     NR == 1 { next }
     /^---[[:space:]]*$/ { exit }
-    /^name:[[:space:]]*/ { sub(/^name:[[:space:]]*/, ""); print; exit }
+    /^name:[[:space:]]*/ { sub(/^name:[[:space:]]*/, ""); sub(/[[:space:]]+$/, ""); print; exit }
   ' "$1"
 }
 
 # Print the value of the `description:` frontmatter field, or "" when absent.
 frontmatter_description() {
   awk '
-    NR == 1 && $0 != "---" { exit }
+    NR == 1 && $0 !~ /^---[[:space:]]*$/ { exit }
     NR == 1 { next }
     /^---[[:space:]]*$/ { exit }
-    /^description:[[:space:]]*/ { sub(/^description:[[:space:]]*/, ""); print; exit }
+    /^description:[[:space:]]*/ { sub(/^description:[[:space:]]*/, ""); sub(/[[:space:]]+$/, ""); print; exit }
   ' "$1"
 }
 
@@ -197,7 +198,9 @@ check_frontmatter() {
 
   if [[ "$STRICT" == true ]]; then
     first="$(head -n 1 "$file")"
-    [[ "$first" == "---" ]] || fail "$name: $file: frontmatter must start on line 1 (strict)"
+    # Same boundary regex as the awk frontmatter parsers, so CRLF (`---\r`)
+    # does not false-FAIL strict mode.
+    [[ "$first" =~ ^---[[:space:]]*$ ]] || fail "$name: $file: frontmatter must start on line 1 (strict)"
   fi
 }
 
