@@ -40,5 +40,9 @@ yarn-error.log*
 # Agent runtime state
 .omo/
 
+# Python
+__pycache__/
+*.pyc
+
 # Local design/plan docs (not part of the distributed artifact)
 docs/
