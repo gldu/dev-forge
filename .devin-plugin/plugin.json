@@ -1,0 +1,21 @@
+{
+  "name": "dev-forge",
+  "version": "0.1.0",
+  "description": "An agentic workflow framework for programming agents — turning SDLC stages into structured, traceable, reproducible AI-driven processes",
+  "author": "dev-forge contributors",
+  "homepage": "https://github.com/<org>/dev-forge",
+  "repository": "https://github.com/<org>/dev-forge",
+  "license": "MIT",
+  "keywords": [
+    "forge",
+    "forge-router",
+    "sdlc",
+    "workflow",
+    "skills",
+    "planning",
+    "tdd",
+    "debugging",
+    "code-review",
+    "release"
+  ]
+}

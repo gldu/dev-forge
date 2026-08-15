@@ -1,0 +1,6 @@
+name: dev-forge
+version: 0.1.0
+description: Agentic SDLC workflow framework for Hermes Agent
+author: dev-forge contributors
+provides_hooks:
+  - pre_llm_call

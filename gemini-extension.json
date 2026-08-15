@@ -1,0 +1,6 @@
+{
+  "name": "dev-forge",
+  "description": "Agentic SDLC workflow framework: requirements, design, TDD, testing, review, integration, release",
+  "version": "0.1.0",
+  "contextFileName": "GEMINI.md"
+}
