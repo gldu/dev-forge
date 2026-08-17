@@ -14,7 +14,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 | Find files by name | `terminal` with `find` |
 | Fetch a URL / read a webpage | `web_extract(urls=[...])` |
 | Search the web | `web_search(query=...)` |
-| Dispatch a subagent | `delegate_task(goal=..., context=..., toolsets=[...], role="leaf")` |
+| Dispatch a subagent (`Subagent (general-purpose):` template) | `delegate_task(goal=..., context=..., toolsets=[...], role="leaf")` |
 | Task tracking | `todo` tool |
 | Invoke a skill | `skill_view("dev-forge:skill-name")` |
 
@@ -43,6 +43,8 @@ read_file(path="~/.hermes/plugins/dev-forge/skills/<skill-name>/SKILL.md")
 This fallback is the same mechanism used by other harnesses without native skill loading.
 
 ## Subagent dispatch
+
+dev-forge skills dispatch work with subagents using the `Subagent (general-purpose):` template. On Hermes Agent:
 
 Use `delegate_task` to spawn isolated subagents for parallel or sequential workstreams:
 

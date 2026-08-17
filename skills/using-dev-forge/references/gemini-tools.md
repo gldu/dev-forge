@@ -1,5 +1,7 @@
 # Gemini CLI Tool Mapping
 
+> **Note**: This file is for **Gemini CLI** only. If you are using **Antigravity** (`agy`), see `antigravity-tools.md` instead.
+
 Skills speak in actions ("dispatch a subagent", "create a todo", "read a file"). On Gemini CLI these resolve to the tools below.
 
 | Action skills request | Gemini CLI equivalent |
@@ -15,7 +17,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 | Fetch a URL | `web_fetch` |
 | Search the web | `google_web_search` |
 | Invoke a skill | `activate_skill` |
-| Dispatch a subagent | `invoke_agent` with `agent_name: "generalist"` (invocable via `@generalist` chat syntax — see [Subagent support](#subagent-support)) |
+| Dispatch a subagent (`Subagent (general-purpose):` template) | `invoke_agent` with `agent_name: "generalist"` (invocable via `@generalist` chat syntax — see [Subagent support](#subagent-support)) |
 | Multiple parallel dispatches | Multiple `invoke_agent` calls in the same response |
 | Task tracking ("create a todo", "mark complete") | `write_todos` (statuses: pending, in_progress, completed, cancelled, blocked) |
 | forge-* `read_files` (incl. glob-pattern reads) / `read` | `read_file` or `read_many_files` |
@@ -38,7 +40,7 @@ User-level skills live at **`~/.gemini/skills/`**, with **`~/.agents/skills/`** 
 
 Gemini CLI dispatches subagents through the `invoke_agent` tool, which takes `agent_name` and `prompt` parameters. The same dispatch is also surfaced as a chat-syntax shortcut: typing `@generalist <prompt>` is equivalent to calling `invoke_agent` with `agent_name: "generalist"`. Built-in agent names include `generalist`, `cli_help`, `codebase_investigator`, and (with browser tooling enabled) `browser_agent`.
 
-dev-forge skills dispatch work with subagents either by referencing a prompt-template file or by supplying an inline prompt. On Gemini CLI:
+dev-forge skills dispatch work with subagents using the `Subagent (general-purpose):` template. On Gemini CLI:
 
 | Skill dispatch form | Gemini CLI equivalent |
 |---------------------|----------------------|

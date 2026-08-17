@@ -45,6 +45,35 @@ When multiple skills apply, process skills come first — they set the approach,
 - "我要做一个登录功能" → forge-router 路由 → forge-change → forge-requirement → forge-design → forge-task → forge-dev → ...
 - "Fix this bug" → forge-fix first.
 
+## Subagent Dispatch (Platform-Neutral)
+
+forge-* skills dispatch subagents using the **`Subagent (general-purpose):`** template. This is a platform-neutral syntax that gets translated to the appropriate tool by the loaded tool mapping.
+
+**Example:**
+```
+Subagent (general-purpose): "Fix the auth module bug"
+```
+
+**How it works:**
+1. Skill writes `Subagent (general-purpose):` with the task description
+2. Agent reads the platform's tool mapping file (see below)
+3. Agent translates to the platform-specific tool call
+
+| Platform | `Subagent (general-purpose):` translates to |
+|----------|---------------------------------------------|
+| Antigravity | `invoke_subagent` with `TypeName: "self"` |
+| Gemini CLI | `invoke_agent` with `agent_name: "generalist"` |
+| Hermes Agent | `delegate_task(goal=..., context=...)` |
+| Claude Code | `Task` tool (native) |
+| Codex CLI | `shell` with subagent command (native) |
+
+**Tool mapping files** (in `references/`):
+- `antigravity-tools.md` — Antigravity (`agy`)
+- `gemini-tools.md` — Gemini CLI
+- `hermes-tools.md` — Hermes Agent
+
+**If no subagent tool is available:** Execute the task inline in the current session (no context isolation).
+
 ## Red Flags
 
 These thoughts mean STOP—you're rationalizing:
