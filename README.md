@@ -2,7 +2,7 @@
 
 **English** | [简体中文](./README.zh-CN.md)
 
-dev-forge is an **agentic workflow framework for programming agents** (Claude Code, Codex, Lingma, Antigravity, OpenCode, Pi, and more). It turns the stages of the software development lifecycle (SDLC) — requirements, design, development, testing, review, integration, release — into structured, traceable, reproducible AI-driven processes through a standardized, collaborative, stage-based workflow.
+dev-forge is an **agentic workflow framework for programming agents** (Claude Code, Codex, Lingma, Antigravity, OpenCode, Pi, Grok Build TUI, and more). It turns the stages of the software development lifecycle (SDLC) — requirements, design, development, testing, review, integration, release — into structured, traceable, reproducible AI-driven processes through a standardized, collaborative, stage-based workflow.
 
 ## Positioning
 
@@ -159,7 +159,7 @@ dev-forge uses the `.specs/` directory to manage all change-level and project-le
 
 ## Installation
 
-dev-forge follows the [Agent Skills](https://agentskills.io) open standard (a Skill directory + `SKILL.md` with `name` / `description` in frontmatter) and is natively supported by Claude Code, Codex CLI, Lingma, Antigravity, OpenCode, Pi, and more. Just drop each Skill directory from `skills/` into your platform's skill load path — no registration needed:
+dev-forge follows the [Agent Skills](https://agentskills.io) open standard (a Skill directory + `SKILL.md` with `name` / `description` in frontmatter) and is natively supported by Claude Code, Codex CLI, Lingma, Antigravity, OpenCode, Pi, Grok Build TUI, and more. Just drop each Skill directory from `skills/` into your platform's skill load path — no registration needed:
 
 | Platform | User-level (global) | Project-level (shipped with the repo) |
 |---|---|---|
@@ -169,8 +169,9 @@ dev-forge follows the [Agent Skills](https://agentskills.io) open standard (a Sk
 | Antigravity | `~/.gemini/config/skills/` (unified across AGY / IDE / CLI) | `.agents/skills/` (workspace root, backward-compatible with `.agent/skills/`) |
 | OpenCode | `~/.config/opencode/skills/` (also reads `~/.agents/skills/`, `~/.claude/skills/`) | `.opencode/skills/` (also reads `.agents/skills/`, `.claude/skills/`) |
 | Pi | `~/.pi/agent/skills/` (also reads `~/.agents/skills/`) | `.pi/skills/` (also reads `.agents/skills/`) |
+| Grok Build TUI | `~/.grok/skills/` (also reads `~/.agents/skills/`) | `.grok/skills/` (also reads `.agents/skills/`) |
 
-> Note: `.agents/skills/` is the shared project-level path recognized by Codex, Antigravity, OpenCode, and Pi — one in-repo distribution covers multiple platforms. Global paths differ per platform and must be linked separately.
+> Note: `.agents/skills/` is the shared project-level path recognized by Codex, Antigravity, OpenCode, Pi, and Grok Build TUI — one in-repo distribution covers multiple platforms. Global paths differ per platform and must be linked separately.
 
 **Option 1: Symlink (recommended — stays in sync with the repo)**
 
@@ -193,9 +194,11 @@ mkdir -p ~/.gemini/config/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.
 mkdir -p ~/.config/opencode/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.config/opencode/skills/"$(basename "$d")"; done
 # Pi
 mkdir -p ~/.pi/agent/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.pi/agent/skills/"$(basename "$d")"; done
+# Grok Build TUI
+mkdir -p ~/.grok/skills && for d in "$SRC"/forge-*; do ln -sfn "$d" ~/.grok/skills/"$(basename "$d")"; done
 ```
 
-**Option 2: In-repo distribution (team sharing)**: copy or link the `skills/` directory into `.agents/skills/`, `.claude/skills/`, `.lingma/skills/`, `.opencode/skills/`, or `.pi/skills/` of the target repo (pick per your team's platform; `.agents/skills/` has the widest coverage). Commit it to the repo so every team member shares the same workflow.
+**Option 2: In-repo distribution (team sharing)**: copy or link the `skills/` directory into `.agents/skills/`, `.claude/skills/`, `.lingma/skills/`, `.opencode/skills/`, `.pi/skills/`, or `.grok/skills/` of the target repo (pick per your team's platform; `.agents/skills/` has the widest coverage). Commit it to the repo so every team member shares the same workflow.
 
 After installing, restart the corresponding CLI (or reopen the IDE) and type `/` in a conversation to confirm the loaded Skills. Triggering relies on semantic matching against each `SKILL.md` `description` — the more specific the description, the more reliable the auto-trigger.
 

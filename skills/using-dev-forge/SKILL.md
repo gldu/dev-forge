@@ -66,14 +66,18 @@ Subagent (general-purpose): "Fix the auth module bug"
 | Hermes Agent | `delegate_task(goal=..., context=...)` |
 | Claude Code | `Task` tool (native) |
 | Codex CLI | `shell` with subagent command (native) |
+| Grok Build TUI | `spawn_subagent` with `subagent_type: "general-purpose"` |
 
 **Tool mapping files** (in `references/`):
 - `antigravity-tools.md` — Antigravity (`agy`)
 - `gemini-tools.md` — Gemini CLI
 - `hermes-tools.md` — Hermes Agent
+- `grok-tools.md` — Grok Build TUI (`grok`)
 - `code-navigation.md` — Code exploration & navigation protocol (CodeGraph MCP & fallback)
 
-**If no subagent tool is available:** Execute the task inline in the current session (no context isolation).
+On Grok Build TUI, read `references/grok-tools.md` before the first subagent dispatch. Call `spawn_subagent` — never emit `Subagent (general-purpose):` as prose. If the child is backgrounded, wait with `get_command_or_subagent_output` before treating the dispatch as done.
+
+**If no subagent tool is available:** Execute the task inline in the current session (no context isolation). A missing mapping-table row is not "no tool". Grok Build TUI's native tool is `spawn_subagent`; do not fall back to inline while that tool is in your tool list.
 
 ## Red Flags
 

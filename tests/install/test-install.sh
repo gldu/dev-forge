@@ -15,7 +15,8 @@
 #     nesting (guards the macOS `ln -sfn` silent-nest regression).
 #   * project mode, --platform claude -> .claude/skills (platform-specific
 #     path from the README installation table).
-#   * global mode with a fake $HOME -> $FAKE_HOME/.claude/skills (absolute
+#   * project mode, --platform grok -> .grok/skills.
+#   * global mode with a fake $HOME -> $FAKE_HOME/.claude/skills (absolute)
 #     targets into the real repo's skills/; platform-detection env vars are
 #     scrubbed so a leaked var can never silently steer the run).
 #   * negatives — unknown platform and empty --platform must exit non-zero
@@ -187,6 +188,19 @@ run_project_claude() {
   return 0
 }
 
+# --- project mode, Grok Build TUI path ---
+
+run_project_grok() {
+  local dest="$TMP_REPO/.grok/skills"
+  if ! "$TMP_REPO/scripts/install.sh" --project --platform grok > "$TMP_DIR/proj-grok.log" 2>&1; then
+    echo "install.sh --project --platform grok exited non-zero; log:" >&2
+    cat "$TMP_DIR/proj-grok.log" >&2
+    return 1
+  fi
+  assert_links "$dest" "$SKILLS_SRC" 1 || return 1
+  return 0
+}
+
 # --- global mode with fake HOME ---
 
 run_global_claude() {
@@ -199,6 +213,18 @@ run_global_claude() {
        HOME="$FAKE_HOME" "$INSTALLER" --global --platform claude > "$TMP_DIR/global.log" 2>&1; then
     echo "install.sh --global --platform claude exited non-zero; log:" >&2
     cat "$TMP_DIR/global.log" >&2
+    return 1
+  fi
+  assert_links "$dest" "$REPO_ROOT/skills" 0 || return 1
+  return 0
+}
+
+run_global_grok() {
+  local dest="$FAKE_HOME/.grok/skills"
+  if ! env -u OPENCODE_CONFIG_DIR -u CLAUDE_PLUGIN_ROOT -u CURSOR_PLUGIN_ROOT -u COPILOT_CLI \
+       HOME="$FAKE_HOME" "$INSTALLER" --global --platform grok > "$TMP_DIR/global-grok.log" 2>&1; then
+    echo "install.sh --global --platform grok exited non-zero; log:" >&2
+    cat "$TMP_DIR/global-grok.log" >&2
     return 1
   fi
   assert_links "$dest" "$REPO_ROOT/skills" 0 || return 1
@@ -290,8 +316,14 @@ check "project re-run is idempotent (still $EXPECTED_COUNT links, no nesting)" \
 check "project install --platform claude links into .claude/skills" \
   run_project_claude
 
+check "project install --platform grok links into .grok/skills" \
+  run_project_grok
+
 check "global install (fake HOME) links into .claude/skills" \
   run_global_claude
+
+check "global install (fake HOME) --platform grok links into .grok/skills" \
+  run_global_grok
 
 check "unknown platform exits non-zero" \
   run_negative_unknown_platform

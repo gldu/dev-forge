@@ -74,7 +74,7 @@ die() {
 
 valid_platform() {
   case "$1" in
-    claude | codex | lingma | antigravity | opencode | pi | cursor | copilot | devin | kimi | hermes | gemini)
+    claude | codex | lingma | antigravity | opencode | pi | cursor | copilot | devin | kimi | hermes | gemini | grok)
       return 0
       ;;
     *)
@@ -109,6 +109,10 @@ global_skills_path() {
     pi)
       echo ".pi/agent/skills"
       ;;
+    grok)
+      # Grok Build TUI — also reads ~/.agents/skills
+      echo ".grok/skills"
+      ;;
     *)
       # cursor / copilot / devin / kimi / hermes / gemini have no standard
       # global skills load path — manifest-only registration.
@@ -139,6 +143,9 @@ project_skills_path() {
       ;;
     pi)
       echo ".pi/skills"
+      ;;
+    grok)
+      echo ".grok/skills"
       ;;
     *)
       echo ""
@@ -241,7 +248,7 @@ detect_platform() {
 # Interactive numbered menu; prompts go to stderr so the platform name is the
 # only thing printed on stdout (detect_platform is called in $(...)).
 interactive_platform_menu() {
-  local platforms=(claude codex lingma antigravity opencode pi cursor copilot)
+  local platforms=(claude codex lingma antigravity opencode pi grok cursor copilot)
   local last="${#platforms[@]}"
   local i=1
   local p
@@ -354,13 +361,14 @@ list_platforms() {
   echo "  antigravity  ~/.gemini/config/skills         .agents/skills"
   echo "  opencode     ~/.config/opencode/skills       .opencode/skills"
   echo "  pi           ~/.pi/agent/skills              .pi/skills"
+  echo "  grok         ~/.grok/skills                  .grok/skills"
   echo ""
   echo "  Manifest-only platforms (no standard skills path): cursor, copilot,"
   echo "  devin, kimi, hermes, gemini — registered per platform docs."
   echo ""
   echo "  --global  (default) installs to your home dir; --project installs"
   echo "  in-repo for team distribution (.agents/skills is the shared path"
-  echo "  recognized by Codex / Antigravity / OpenCode / Pi)."
+  echo "  recognized by Codex / Antigravity / OpenCode / Pi / Grok)."
 }
 
 install_global() {

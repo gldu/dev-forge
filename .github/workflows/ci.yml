@@ -50,6 +50,7 @@ jobs:
         run: |
           ./tests/hooks/test-session-start.sh
           ./tests/skills/test-structure.sh
+          ./tests/skills/test-grok-subagent.sh
           ./tests/install/test-install.sh
           ./tests/references/test-references.sh
 
