@@ -57,9 +57,41 @@ description: Use when starting a new change proposal, initializing CHANGE.md, or
 
 描述包含以下任一 → 判定为前端项目：网站/网页/页面/web/app/应用/移动端/小程序/dashboard/后台/界面/UI/前端/用户端/客户端/GUI
 
-非前端项目（CLI / 后端 API / lib / SDK）跳过 0.6。
+非前端项目（CLI / 后端 API / lib / SDK）跳过 0.55 和 0.6。
 
-### 0.6. 视觉调性预选（仅前端项目，独立一条消息，等用户回复）
+### 0.55. 已有 UI 探测（仅前端项目，必跑）
+
+**目的**：仓库里已经有前端时，禁止再出 9 张调性卡片。
+
+**视为已有 UI（命中任一）**：
+1. `.specs/**/UI-DESIGN.md` 或 `.specs/archive/**/UI-DESIGN.md`
+2. 上一份 CHANGE.md 已有「视觉调性」且「选定」非空
+3. 存在实际 UI 实现：页面/组件，以及 token / theme 源（`tailwind.config.*` / `:root` CSS variables / `theme.*` / design tokens 文件）
+
+**用户这句已在说换风格**（换调性 / 改风格 / restyle / 重做 UI / 重新做视觉）→ 不沿用。整库换调性优先引导 `forge-restyle`；若用户坚持在本次 change 里选新调性，走 0.6 预选支。
+
+- 命中已有 UI 且不是换风格 → 走 0.6 **沿用支**。**禁止**贴 9 张卡片。
+- 未命中 → greenfield，走 0.6 **预选支**。
+
+### 0.6. 视觉调性（仅前端项目）
+
+#### 沿用支（0.55 命中已有 UI）
+
+按顺序推断调性，取第一条能锁定「编号 + 名称」的：
+1. 最近一份 `UI-DESIGN.md` 的调性字段
+2. 最近一份 CHANGE.md「视觉调性」
+3. 从 token / theme / 3 个代表页面反推 9 调性中最接近的一张
+
+写入 CHANGE.md「视觉调性」：**来源**填「沿用既有 UI」，**证据**写路径。
+
+**一句话告知，不等数字、不等确认**：
+```
+沿用现有调性：<编号> <名称>（来自 <路径>）。要换请走 forge-restyle。
+```
+
+然后直接进步骤 1。本支**禁止**加载或展示 `ui-aesthetics-excerpt.md` 的 9 张卡片模板。
+
+#### 预选支（greenfield，或用户要换风格且继续走 change）
 
 **红线：本步不出其他问题。只列调性卡片 + 推荐，用户选定后才开启反问。**
 
@@ -70,13 +102,13 @@ description: Use when starting a new change proposal, initializing CHANGE.md, or
 - **显式排除**明显不合适的 1~3 个 + 理由
 - 末尾：`请回复数字（如 "6"）或描述你想要的感觉`
 
-**例外**：用户描述含强偏好（"参考 Notion"）→ 直接锁定对应调性，跳过卡片。
+**例外**：用户描述含强偏好（"参考 Notion"）→ 直接锁定对应调性，跳过卡片，**来源**填「用户强偏好」。
 
-**选定后**：写入 CHANGE.md「视觉调性」字段，继承到 2a-ui-design。
+**选定后**：写入 CHANGE.md「视觉调性」，**来源**填「预选」，继承到 2a-ui-design。
 
 ### 1. 反问
 
-用户选定调性后（或非前端跳过 0.6 后），用结构化提问把"为什么/给谁/解决什么/何时算完"问清楚。每轮最多 2~3 个问题，等用户回答再继续。
+用户完成 0.6 后（沿用 / 预选 / 强偏好），或非前端跳过 0.55–0.6 后，用结构化提问把"为什么/给谁/解决什么/何时算完"问清楚。每轮最多 2~3 个问题，等用户回答再继续。
 - **不允许与调性卡片同屏呈现**
 
 ### 1.1 Grill-me 交互追问机制（当用户显式输入 /grill-me 或意图模糊时开启）
@@ -115,6 +147,7 @@ description: Use when starting a new change proposal, initializing CHANGE.md, or
 - 不允许凭空假设未确认的需求点
 - 不允许在 CHANGE.md 里写实现细节（那是 DESIGN 的事）
 - 步骤 0.4 已跑：未命中就跳过；命中且用户选 2 → CHANGE.md 末尾有「架构层影响声明」
+- 已有 UI 且非换风格：禁止展示 9 张调性卡片；只允许一句话沿用告知
 
 ## Validation
 
@@ -123,6 +156,9 @@ description: Use when starting a new change proposal, initializing CHANGE.md, or
 - [ ] 路径建议有理由，不是默认全跑
 - [ ] 没有跳到实现层
 - [ ] 步骤 0.4 已跑且处理正确
+- [ ] 前端项目：0.55 已跑
+- [ ] 已有 UI 且非换风格：未展示 9 张卡片；CHANGE「来源」为「沿用既有 UI」
+- [ ] greenfield 或用户要换风格：走了 0.6 预选（或强偏好直接锁定）
 
 ## Resources
 

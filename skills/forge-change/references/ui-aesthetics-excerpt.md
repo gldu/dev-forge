@@ -1,6 +1,9 @@
 # UI 美学 — 0-change 调性预选节选
 
-> 本文件仅含 forge-change 步骤 0.6 所需的「调性」一节。完整决策框架见 `forge-ui-design/references/ui-aesthetics.md`（forge-ui-design 使用）。
+> 本文件仅含 forge-change 步骤 0.6 **预选支**所需的「调性」一节。完整决策框架见 `forge-ui-design/references/ui-aesthetics.md`（forge-ui-design 使用）。
+>
+> **何时用本模板**：greenfield（仓库无 UI / 无 UI-DESIGN），或用户明确要换风格且继续走 change。
+> **何时禁止用本模板**：0.55 已判定存在前端，且用户不是在换风格。那种情况走沿用支，一句话告知即可。
 
 ---
 
@@ -65,7 +68,7 @@
 ## 给 AI 在 0-change 阶段展示用的标准模板
 
 ```
-视觉调性预选（前端项目必选）
+视觉调性预选（仅 greenfield / 用户要换风格）
 
 我为你列出 9 种主流方向，请选一个数字回复（也可描述自己的想法）：
 
@@ -91,3 +94,4 @@
 - 推荐理由必须结合项目具体业务
 - 必须显式排除明显不合适的
 - 用户已有强偏好 → 直接锁定对应方向
+- 已有 UI 且非换风格 → **不要使用本模板**

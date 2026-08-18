@@ -159,7 +159,7 @@ Token 预算估计：
 
 | 阶段 | 全读（SPEC） | 查表（REFERENCE） | 按需 |
 |---|---|---|---|
-| 0 / 1 | — | `skills/forge-change/references/ui-aesthetics-excerpt.md` 只查调性模板卡片（仅前端）| — |
+| 0 / 1 | — | 仅 greenfield / 用户要换风格时查 `skills/forge-change/references/ui-aesthetics-excerpt.md` 调性模板；已有 UI 沿用时不读 | — |
 | 2 | `CHANGE.md` + `REQUIREMENT.md` + `CONTEXT.md` + `ARCHITECTURE.md`（如存在）| `skills/forge-design/references/tech-stacks-excerpt.md` 只查「适用矩阵」+ 5~6 张卡片 | ADR 阶段深谈时查 |
 | 2a | `CHANGE.md` + `REQUIREMENT.md` + `DESIGN.md` `## 0` 段 + `CONTEXT.md` + `ui-anti-patterns.md`（84 行）| `skills/forge-ui-design/references/ui-aesthetics.md` 查「5 维度」| uipro / impeccable 查询 |
 | 3 | `REQUIREMENT.md` + `DESIGN.md` + `UI-DESIGN.md`（前端）+ `CONTEXT.md` | — | 任务模板查询 |
