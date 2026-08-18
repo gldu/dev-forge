@@ -83,13 +83,15 @@ Maintenance Engineer。**只产健康报告 + 改造建议清单，不直接改�
 2. 再跑语言原生工具（按上表任选 1-2 个）
 3. 工具未装 → 提示用户：`ℹ️ 需要跑《<cmd>》，是否授权自动安装？`（2 次拒绝 → 进 2.5.3 fallback）
 
-#### 2.5.3 Fallback：AI grep 抓样
+#### 2.5.3 Fallback：CodeGraph / AI grep 抓样
 
-用户不肯装工具的退路：
-- **重复块**：抽样 10 个最近改动的源文件，查 ≥ 5 行连续逻辑块在其他文件的出现
-- **未用导出**：`grep "^export "` 拼符号后反向查引用数，0 次为候选
-- **死代码**：只抽检明显的（`if false` / `return` 后的语句 / 永负分支）
-- **未用依赖**：按清单文件逐条 grep 引用次数
+用户不肯装专用工具时的退路：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="find dead code and exports with zero external callers")`
+- **【回退 · grep/glob】**：
+  - **重复块**：抽样 10 个最近改动的源文件，查 ≥ 5 行连续逻辑块在其他文件的出现
+  - **未用导出**：`grep "^export "` 拼符号后反向查引用数，0 次为候选
+  - **死代码**：只抽检明显的（`if false` / `return` 后的语句 / 永负分支）
+  - **未用依赖**：按清单文件逐条 grep 引用次数
 
 在报告里标记：`⚠️ 内置 fallback 检测 · 精度低 · 漏报率高 · 建议装 jscpd / knip / vulture / staticcheck`
 

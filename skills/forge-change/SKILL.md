@@ -26,10 +26,11 @@ description: Use when starting a new change proposal, initializing CHANGE.md, or
 
 **目的**：检测是否涉及项目级架构变更（拆服务 / 换数据库 / 换鉴权方案等），这类变更应先在 ARCHITECTURE 层达成共识。
 
-- 返回 affected_modules >= 3 或 risk HIGH/CRITICAL → 命中架构级变更
-- 返回 LOW/MEDIUM 且 affected_modules < 3 → 非架构级
-
-**grep 回退**：按以下 5 条标准判定。
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="blast radius and affected modules for changing <module_or_feature>")`
+  - 返回 blast-radius 涉及 affected_modules >= 3 或跨核心子系统边界 → 命中架构级变更
+  - 返回局部变更且 affected_modules < 3 → 非架构级
+- **【回退 · grep/glob】**：按以下 5 条标准启发式判定。
 
 **命中任一即触发**：
 1. 影响项目级模块结构（新增/拆分/合并/删除模块）

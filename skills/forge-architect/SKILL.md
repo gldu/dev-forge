@@ -54,7 +54,7 @@ A-architect 模式：<A · 首跑 / B · 重构>
 然后我会基于代码扫描画一个服务边界图（mermaid）让你校准。
 ```
 
-得到一句话后，AI 自己 grep + 分析画 mermaid 图，给用户校准。
+得到一句话后，AI 自己利用 codegraph_explore（或 grep 降级）分析画 mermaid 图，给用户校准。
 
 #### 2.2 NFR 基线
 
@@ -70,21 +70,23 @@ A-architect 模式：<A · 首跑 / B · 重构>
 
 #### 3.1 模块发现
 
-   ```
-   MATCH (c:Community) RETURN c.heuristicLabel, c.symbolCount, c.keywords, c.description, c.cohesion
-   ```
-2. 每个 Community 即一个功能模块，字段自动包含：路径（从 keywords 推断）、职责（description）、符号数、内聚度
-
-**grep 回退**：
-```
-ls src/                               # 顶层结构
-find src -type d -maxdepth 3          # 深一层
-grep -rn "^import" src/ | head -200   # 抽样依赖关系
-```
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="map architecture modules, boundaries, and dependency directions")`
+  每个功能分区自动包含：路径、职责描述、符号数、依赖流向。
+- **【回退 · grep/glob】**：
+  ```bash
+  ls src/                               # 顶层结构
+  find src -type d -maxdepth 3          # 深一层
+  grep -rn "^import" src/ | head -200   # 抽样依赖关系
+  ```
 
 合成模块表。每个模块给 4 个字段：路径 / 职责 / 依赖 / 暴露给谁。
 
-#### 3.2 依赖规则（grep 出实际，让用户确认是否要锁）
+#### 3.2 依赖规则（识别实际依赖流向，让用户确认是否要锁）
+
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="check dependency flow between modules and find cross-boundary or circular imports")`
+- **【回退 · grep/glob】**：抽样 `grep -rn "^import"` 配合人工逻辑梳理依赖矩阵。
 
 展示实际依赖图样本，建议 hard rule：
 - 允许的依赖方向
@@ -117,7 +119,9 @@ grep -rn "^import" src/ | head -200   # 抽样依赖关系
 
 #### 5.1 公共 API · 跨模块契约
 
-**grep 回退**：grep 路由定义，整理成路由表。只列 public API，变更频繁的 / 内部 API 不必全列。
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="find all public API endpoints and cross-module contracts")`
+- **【回退 · grep/glob】**：grep 路由定义，整理成路由表。只列 public API，变更频繁的 / 内部 API 不必全列。
 
 #### 5.2 事件总线 / Schema · 仅在涉及时跑
 

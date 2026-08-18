@@ -73,7 +73,9 @@ description: Use when onboarding a new project, scanning codebase structure, or 
 
 #### 1.2 框架检测
 
-**grep 回退**：探测 React / Vue / Svelte / Next / Nuxt / NestJS / FastAPI / Django / Spring Boot / Express 等。
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="survey tech stack, frameworks, UI runtime, and backend server")`
+- **【回退 · grep/glob】**：检查信号文件依赖并正则探测 React / Vue / Svelte / Next / Nuxt / NestJS / FastAPI / Django / Spring Boot / Express 等。
 
 #### 1.3 关键约定
 
@@ -85,16 +87,17 @@ description: Use when onboarding a new project, scanning codebase structure, or 
 
 #### 1.4 既有抽象层（关键 · 防重复实现）
 
-返回结果含 `process_symbols`（文件位置 + 模块归属），直接写入 CONTEXT.md「既有抽象索引」段。
-
-**grep 回退**：
-- HTTP client：`grep -rn "axios\|fetch\|httpClient\|apiClient" src/`
-- 数据库访问：`grep -rn "Repository\|DAO\|prisma\|sequelize" src/`
-- 状态管理：`grep -rn "createStore\|useStore\|atom" src/`
-- 工具函数：`find src -path '*utils*' -o -path '*helpers*'`
-- 自定义 hooks（前端）：`find src -name 'use*.ts*'`
-- 中间件：`find src -path '*middleware*'`
-- 错误处理：`grep -rn "class.*Error\|errorHandler\|ErrorBoundary" src/`
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="find existing abstractions for HTTP client, DB access, state management, utilities, custom hooks, middleware, error handling")`
+  提取返回结果中的带行号源码与模块归属，直接写入 CONTEXT.md「既有抽象索引」段。
+- **【回退 · grep/glob】**：
+  - HTTP client：`grep -rn "axios\|fetch\|httpClient\|apiClient" src/`
+  - 数据库访问：`grep -rn "Repository\|DAO\|prisma\|sequelize" src/`
+  - 状态管理：`grep -rn "createStore\|useStore\|atom" src/`
+  - 工具函数：`find src -path '*utils*' -o -path '*helpers*'`
+  - 自定义 hooks（前端）：`find src -name 'use*.ts*'`
+  - 中间件：`find src -path '*middleware*'`
+  - 错误处理：`grep -rn "class.*Error\|errorHandler\|ErrorBoundary" src/`
 
 #### 1.5 数据库 schema
 
@@ -102,16 +105,16 @@ description: Use when onboarding a new project, scanning codebase structure, or 
 
 #### 1.6 API 路由映射
 
-**grep 回退**：`grep -rn "@Route\|@Controller\|@GetMapping\|@PostMapping" src/`
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="find all API routes, controller endpoints, and request handlers")`
+- **【回退 · grep/glob】**：`grep -rn "@Route\|@Controller\|@GetMapping\|@PostMapping" src/`
 
 #### 1.7 模块/功能分区
 
-```
-MATCH (c:Community) RETURN c.heuristicLabel, c.symbolCount, c.keywords, c.description
-```
-每个 Community 即一个功能分区，直接写入 CONTEXT.md「模块清单」段。
-
-**grep 回退**：`ls src/` + `find src -type d -maxdepth 3`
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="survey project structure, module boundaries, entrypoints, and community clusters")`
+  提取每个功能分区的路径、职责与符号摘要，直接写入 CONTEXT.md「模块清单」段。
+- **【回退 · grep/glob】**：`ls src/` + `find src -type d -maxdepth 3`
 
 ### 2. 生成 CONTEXT.md
 

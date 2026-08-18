@@ -27,17 +27,18 @@ AI 不允许自行编造临时 TASK。缺字段必须反问用户或回到 forge
 
 ### 1.1 沿用既有抽象（强制 · R6.4）
 
-返回 `process_symbols` 含文件位置 + 模块归属，直接定位既有实现。
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="find existing implementation and callers of <capability_or_symbol>")`
+  直接获取既有实现的带行号源码与调用样例，避免重复造轮子。
+- **【回退 · grep/glob】**：针对 action 中每个能力执行 grep：
+  - HTTP 请求：`grep -rn "axios\|fetch\|httpClient\|apiClient" src/`
+  - 日期格式化：`grep -rn "format.*[Dd]ate\|date.*[Ff]ormat" src/utils src/lib`
+  - 状态管理：看 package.json
+  - Repository/DAO：`grep -rn "class.*Repository\|@Entity" src/`
+  - 错误处理：`grep -rn "ErrorBoundary\|errorHandler\|class.*Error" src/`
+  - 自定义 hooks：`find src -name 'use*.ts*'`
 
-**grep 回退**：针对 action 中每个能力执行 grep：
-- HTTP 请求：`grep -rn "axios\|fetch\|httpClient\|apiClient" src/`
-- 日期格式化：`grep -rn "format.*[Dd]ate\|date.*[Ff]ormat" src/utils src/lib`
-- 状态管理：看 package.json
-- Repository/DAO：`grep -rn "class.*Repository\|@Entity" src/`
-- 错误处理：`grep -rn "ErrorBoundary\|errorHandler\|class.*Error" src/`
-- 自定义 hooks：`find src -name 'use*.ts*'`
-
-**必须**把搜索命令和结果贴入 SUMMARY「6 维自查」段。禁止"项目里好像没有"——必须有证据。
+**必须**把探索 Query/搜索命令和结果贴入 SUMMARY「6 维自查」段。禁止"项目里好像没有"——必须有证据。
 
 ### 1.2 扫 LESSONS（强制 · R1.8）
 

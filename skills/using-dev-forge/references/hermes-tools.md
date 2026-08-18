@@ -12,6 +12,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 | Run a shell command | `terminal` |
 | Search file contents | `search_files` |
 | Find files by name | `terminal` with `find` |
+| Deep code exploration / flow tracing | `codegraph_explore` (MCP) or `codegraph query "..."` (CLI); fallback to `search_files` / `find` (see `code-navigation.md`) |
 | Fetch a URL / read a webpage | `web_extract(urls=[...])` |
 | Search the web | `web_search(query=...)` |
 | Dispatch a subagent (`Subagent (general-purpose):` template) | `delegate_task(goal=..., context=..., toolsets=[...], role="leaf")` |

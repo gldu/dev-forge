@@ -71,6 +71,7 @@ Subagent (general-purpose): "Fix the auth module bug"
 - `antigravity-tools.md` — Antigravity (`agy`)
 - `gemini-tools.md` — Gemini CLI
 - `hermes-tools.md` — Hermes Agent
+- `code-navigation.md` — Code exploration & navigation protocol (CodeGraph MCP & fallback)
 
 **If no subagent tool is available:** Execute the task inline in the current session (no context isolation).
 

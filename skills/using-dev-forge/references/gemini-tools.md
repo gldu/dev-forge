@@ -26,6 +26,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 | forge-* `bash` / shell commands | `run_shell_command` |
 | forge-* `grep` / searching file contents | `grep_search` |
 | forge-* `glob` / finding files by name | `glob` |
+| forge-* `codegraph_explore` / code exploration | `codegraph_explore` (MCP tool) if available & indexed; fallback to `grep_search` / `glob` (see `code-navigation.md`) |
 | `TodoWrite` references | `write_todos` |
 
 ## Instructions file

@@ -36,7 +36,10 @@ description: Use when reproducing, diagnosing, and fixing bugs, defects, or test
 
 1. 读取完整的 Error Stack Trace 和运行时日志。
 2. 遵循反假设原则：根据日志与断点证据推导根因，禁止盲目修改或吞掉异常。
-3. **grep 回退**：`grep -rn "<符号/方法名>" src/` 查引用图。
+3. **代码探索（双轨机制）**：
+   - **【优先 · CodeGraph】**：`codegraph_explore(query="trace call paths from entrypoints to <error_symbol_or_function>")`
+     获取从入口点到崩溃位置的完整调用链（包含动态派发与回调），精准定位触发时机。
+   - **【回退 · grep/glob】**：`grep -rn "<符号/方法名>" src/` 结合错误堆栈逐层人工排查引用图。
 
 ### 3. 最小化修复 (GREEN 阶段)
 

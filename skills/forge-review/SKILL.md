@@ -53,11 +53,10 @@ description: Use when performing 3+1 stage code review (3 mandatory + 1 optional
 
 触发条件：新增/重命名顶级模块 / 危险 import / 引入新中间件 / 跨 >= 5 模块重构。
 
-1. **图谱查询**（工具支持时）：检测循环依赖
-   ```
-   MATCH (a:Class)-[:CodeRelation {type: 'IMPORTS'}]->(b:Class)-[:CodeRelation {type: 'IMPORTS'}]->(a) RETURN a.name, a.filePath, b.name, b.filePath
-   ```
-2. **grep 回退**（无图谱工具）：`grep -rn "^import\|from '" src/` 抽样依赖方向，人工判定循环 / 反向 / 跨边界依赖。
+**代码探索（双轨机制）**：
+1. **【优先 · CodeGraph】**：`codegraph_explore(query="check circular dependencies, reverse dependencies, and cross-boundary imports in <modified_modules>")`
+   直接获取相关符号的依赖拓扑、循环依赖链条与受影响消费者。
+2. **【回退 · grep/glob】**：`grep -rn "^import\|from '" src/` 抽样依赖方向，人工判定循环 / 反向 / 跨边界依赖。
 3. 装了 brooks-lint → `/brooks-audit`，拿到 Mermaid 依赖图。重点核：
    - 循环依赖
    - 反向依赖（domain 依赖 controller）

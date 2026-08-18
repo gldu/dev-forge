@@ -42,16 +42,20 @@ description: Use when creating technical design specifications, choosing tech st
 
 #### 0.5.1 列出本次 change 会触碰的既有模块
 
-   ```
-   MATCH (c:Community) WHERE c.keywords CONTAINS "<关键词>" RETURN c.heuristicLabel, c.symbolCount
-   ```
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="identify modules, symbols, and blast radius affected by <change_keywords>")`
+- **【回退 · grep/glob】**：基于 REQUIREMENT.md 和 CONTEXT.md，grep 出实际会涉及的模块：
 
-**grep 回退**：基于 REQUIREMENT.md 和 CONTEXT.md，grep 出实际会涉及的模块：
-- 触碰模块（既有 · 来自 grep）
+明确列出：
+- 触碰模块（既有 · 来自 CodeGraph / grep）
 - 新增模块
 - 禁动清单（与本次无关，AI 不许"顺手"碰）
 
 #### 0.5.2 对齐既有抽象（防重复实现）
+
+**代码探索（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="how is <capability> implemented and can it be reused?")`
+- **【回退 · grep/glob】**：按能力关键词 grep 既有工具函数与抽象层。
 
 针对本次 change 需要的能力，先问已有的能不能用。禁止"顺便引入 X 库"——必须写出为什么不用既有的才能引新。
 

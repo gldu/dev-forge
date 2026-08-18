@@ -54,6 +54,11 @@ description: Use when restructuring code without changing existing behavior or e
 
 ### 2. 行为保持型重构 (Refactoring)
 
+**代码探索与影响面分析（双轨机制）**：
+- **【优先 · CodeGraph】**：`codegraph_explore(query="find all callers, callees, and blast radius for refactoring <target_symbol>")`
+  直接获取所有调用方、动态派发流向与潜在影响范围。
+- **【回退 · grep/glob】**：`grep -rn "\b<target_symbol>\b" src/` 全局扫描引用点。
+
 在测试保护下应用结构优化：
 - **拆分认知过载**：解耦超过 50 行的巨型函数、消除深度嵌套。
 - **消除知识重复**：抽取可复用公共函数或抽象组件。
@@ -69,7 +74,7 @@ description: Use when restructuring code without changing existing behavior or e
 - 严禁在重构过程中顺便增加新 feature 或改变既有业务逻辑
 - 严禁通过修改测试断言来使重构后的代码通过测试
 - 单次重构只处理一个关注点，禁止一次性推翻多个模块的巨型 diff；提交前按 R6.5 做 diff 边界 verify
-- 需要改动公共导出 / 公共 API 时按 R4.6 走破坏性变更协议（grep 引用图 + 反问用户），否则视为契约破坏
+- 需要改动公共导出 / 公共 API 时按 R4.6 走破坏性变更协议（CodeGraph / grep 查引用图 + 反问用户），否则视为契约破坏
 
 ## Validation
 
